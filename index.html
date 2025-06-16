@@ -1,0 +1,3854 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MockaVerse - Senaryo ve Mock Servis Yönetimi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f8f9fa;
+      padding-top: 56px;
+    }
+    .navbar-brand {
+      font-weight: bold;
+    }
+    .header-title {
+      margin-bottom: 25px;
+      color: #343a40;
+      border-bottom: 2px solid #6c757d;
+      padding-bottom: 10px;
+    }
+    .card {
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+      font-weight: bold;
+      background-color: #f8f9fa;
+    }
+    .service-card {
+      margin-top: 15px;
+      border-left: 3px solid #108206;
+      border-top: 1px solid #108206;
+      border-right: 1px solid #108206;
+      border-bottom: 1px solid #108206;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(16, 130, 6, 0.1);
+    }
+    .service-card .card-body h6 {
+      color: #108206;
+      font-weight: bold;
+    }
+    .btn-icon {
+      margin-right: 5px;
+    }
+    .scenario-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .modal-xl {
+      max-width: 90%;
+    }
+    .header-scenario-list {
+      background-color: #fff;
+      border-radius: 0.25rem;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    /* Navbar yüksekliğini 1,5 katına çıkarma */
+    .navbar.bg-primary {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      background-color: #108206 !important; /* Navbar rengini değiştirme */
+    }
+    
+    .navbar-brand {
+      font-size: 1.5rem;
+      color: #fff !important; /* Yeşil arka plan için beyaz yazı rengi */
+    }
+    
+    /* Navbar için text rengini değiştirme */
+    .navbar-dark .navbar-nav .nav-link, 
+    .navbar-dark .navbar-toggler-icon {
+      color: #fff !important;
+    }
+    
+    /* İçeriğin başlık çubuğunun altında düzgün görünmesi için */
+    .container.mt-4 {
+      margin-top: 5rem !important;
+    }
+    
+    /* Butonların rengini değiştirme */
+    .btn-primary {
+      background-color: #108206;
+      border-color: #108206;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+      background-color: #0d6b05 !important;
+      border-color: #0d6b05 !important;
+    }
+    
+    /* Düzenle butonlarının rengini değiştirme */
+    .btn-info {
+      background-color: #108206;
+      border-color: #108206;
+      color: #fff;
+    }
+    
+    .btn-info:hover, .btn-info:focus, .btn-info:active {
+      background-color: #0d6b05 !important;
+      border-color: #0d6b05 !important;
+      color: #fff !important;
+    }
+    
+    /* Senaryo listesindeki düzenle butonları için */
+    .btn-outline-primary {
+      color: #108206 !important;
+      border-color: #108206 !important;
+    }
+    
+    .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+      background-color: #108206 !important;
+      color: #fff !important;
+    }
+    
+    /* Form elemanları için yeşil odaklanma efekti */
+    .form-control:focus {
+      border-color: #108206 !important;
+      box-shadow: 0 0 0 0.25rem rgba(16, 130, 6, 0.25) !important;
+    }
+    
+    .form-check-input:focus {
+      border-color: #108206 !important;
+      box-shadow: 0 0 0 0.25rem rgba(16, 130, 6, 0.25) !important;
+    }
+    
+    .form-check-input:checked {
+      background-color: #108206 !important;
+      border-color: #108206 !important;
+    }
+    
+    /* By IBTECH stili */
+    .by-text {
+      font-size: 0.9rem;
+      font-weight: normal;
+      opacity: 0.8;
+      margin-left: 5px;
+      font-style: italic;
+      border-left: 2px solid rgba(0, 0, 0, 0.2);
+      padding-left: 8px;
+    }
+
+    /* Kullanıcı bilgisi ve çıkış butonu stilleri */
+    .user-info {
+      color: #fff;
+      font-size: 0.9rem;
+      margin-right: 1rem;
+    }
+
+    .btn-logout {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      font-size: 0.85rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-logout:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #fff;
+    }
+
+    .navbar-nav-right {
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#" style="display: flex; align-items: center;">
+        <img src="MV_logo.jpg" alt="MockaVerse Logo" style="height: 40px; margin-right: 10px;">
+        <span class="by-text">by IBTECH</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav navbar-nav-right">
+          <div class="d-flex align-items-center">
+            <span class="user-info">
+              <i class="bi bi-person-circle me-1"></i>
+              <span id="currentUser">Kullanıcı</span>
+            </span>
+            <button class="btn btn-logout" onclick="logout()">
+              <i class="bi bi-box-arrow-right me-1"></i>
+              Çıkış
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Ana İçerik -->
+  <div class="container mt-4">
+    <!-- "Mevcut Senaryolar" bölümü kaldırıldı -->
+    <div id="headerScenarioList" style="display: none;"></div>
+
+    <!-- Sekme Navigasyonu -->
+    <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="scenarios-tab" data-bs-toggle="tab" data-bs-target="#scenarios-pane" type="button" role="tab" aria-controls="scenarios-pane" aria-selected="true">
+          <i class="bi bi-list-task me-2"></i>Senaryolar
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="rules-tab" data-bs-toggle="tab" data-bs-target="#rules-pane" type="button" role="tab" aria-controls="rules-pane" aria-selected="false">
+          <i class="bi bi-diagram-3 me-2"></i>Kural - Senaryo Eşleştirme
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="channels-tab" data-bs-toggle="tab" data-bs-target="#channels-pane" type="button" role="tab" aria-controls="channels-pane" aria-selected="false">
+          <i class="bi bi-broadcast me-2"></i>Kanal Tanım
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab" aria-controls="users-pane" aria-selected="false">
+          <i class="bi bi-people me-2"></i>Kullanıcı Tanım
+        </button>
+      </li>
+    </ul>
+
+    <!-- Sekme İçerikleri -->
+    <div class="tab-content" id="mainTabContent">
+      <!-- Senaryolar Sekmesi -->
+      <div class="tab-pane fade show active" id="scenarios-pane" role="tabpanel" aria-labelledby="scenarios-tab">
+        <section id="scenarios">
+      <div class="row align-items-center mb-4">
+        <div class="col">
+          <h1 class="header-title">Senaryolar</h1>
+        </div>
+        <div class="col text-end">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newScenarioModal">
+            <i class="bi bi-plus-lg btn-icon"></i> Yeni Senaryo
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtreleme Alanları -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3 mb-2">
+              <label for="filterScenarioName" class="form-label">Senaryo Adı</label>
+              <input type="text" class="form-control" id="filterScenarioName" placeholder="Senaryo adına göre ara...">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="filterServiceName" class="form-label">Servis Adı</label>
+              <input type="text" class="form-control" id="filterServiceName" placeholder="Servis adına göre ara...">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="filterTransactionName" class="form-label">TransactionName</label>
+              <input type="text" class="form-control" id="filterTransactionName" placeholder="TransactionName'e göre ara...">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="filterChannel" class="form-label">KANAL</label>
+              <select class="form-select" id="filterChannel">
+                <option value="">Tüm Kanallar</option>
+                <!-- Dinamik olarak JavaScript ile doldurulacak -->
+              </select>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end mt-2">
+            <button class="btn btn-outline-secondary me-2" id="clearFiltersBtn">
+              <i class="bi bi-x-circle"></i> Temizle
+            </button>
+            <button class="btn btn-primary" id="applyFiltersBtn">
+              <i class="bi bi-search"></i> Filtrele
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Senaryo Listesi -->
+      <div class="card">
+        <div class="card-body" id="scenarioList">
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered table-sm mb-0">
+              <thead class="sticky-top bg-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Senaryo Adı</th>
+                  <th>Servis Adları</th>
+                  <th>TransactionName</th>
+                  <th>KANAL</th>
+                  <th>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="scenarioTableBody">
+                <!-- Bu bölüm JavaScript ile doldurulacak -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div class="text-muted small">
+              <span id="scenarioTotalCount">Toplam: 0 senaryo</span> | 
+              <span id="scenarioVisibleCount">Görüntülenen: 0 senaryo</span>
+            </div>
+            <div id="scenarioPagination" class="pagination-container">
+              <nav aria-label="Senaryo sayfaları">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item disabled" id="scenarioPrevPage">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Önceki</a>
+                  </li>
+                  <li class="page-item active"><a class="page-link" href="#" data-page="1">1</a></li>
+                  <li class="page-item disabled" id="scenarioNextPage">
+                    <a class="page-link" href="#">Sonraki</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+        </section>
+      </div>
+
+      <!-- Kural - Senaryo Eşleştirme Sekmesi -->
+      <div class="tab-pane fade" id="rules-pane" role="tabpanel" aria-labelledby="rules-tab">
+        <section id="rules">
+          <div class="row align-items-center mb-4">
+            <div class="col">
+              <h1 class="header-title">Kural - Senaryo Eşleştirme</h1>
+            </div>
+            <div class="col text-end">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newRuleModal">
+                <i class="bi bi-plus-lg btn-icon"></i> Kural - Senaryo Eşleştir
+              </button>
+            </div>
+          </div>
+
+          <!-- Kural Filtreleme Alanı -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-12 mb-2">
+                  <label for="filterRuleText" class="form-label">Kural İçeriği</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="filterRuleText" placeholder="Kural içeriği ya da senaryo adı ile ara..">
+                    <button class="btn btn-primary" id="applyRuleFilterBtn">
+                      <i class="bi bi-search"></i> Filtrele
+                    </button>
+                    <button class="btn btn-outline-secondary" id="clearRuleFilterBtn">
+                      <i class="bi bi-x-circle"></i> Temizle
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kural Listesi -->
+          <div class="card">
+            <div class="card-body" id="ruleList">
+              <!-- Bu bölüm JavaScript ile doldurulacak -->
+              <div class="alert alert-info">
+                Henüz hiç kural tanımlanmamış. Yeni bir kural ekleyin.
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Kanallar Sekmesi -->
+      <div class="tab-pane fade" id="channels-pane" role="tabpanel" aria-labelledby="channels-tab">
+        <section id="channels">
+          <div class="row align-items-center mb-4">
+            <div class="col">
+              <h1 class="header-title">Kanal Tanım</h1>
+            </div>
+            <div class="col text-end">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChannelModal">
+                <i class="bi bi-plus-lg btn-icon"></i> Yeni Kanal
+              </button>
+            </div>
+          </div>
+
+          <!-- Kanal Filtreleme Alanı -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label for="filterChannelCode" class="form-label">Kanal Kodu</label>
+                  <input type="text" class="form-control" id="filterChannelCode" placeholder="Kanal koduna göre ara...">
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="filterChannelDescription" class="form-label">Açıklama</label>
+                  <input type="text" class="form-control" id="filterChannelDescription" placeholder="Açıklamaya göre ara...">
+                </div>
+              </div>
+              <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-outline-secondary me-2" id="clearChannelFiltersBtn">
+                  <i class="bi bi-x-circle"></i> Temizle
+                </button>
+                <button class="btn btn-primary" id="applyChannelFiltersBtn">
+                  <i class="bi bi-search"></i> Filtrele
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kanal Listesi -->
+          <div class="card">
+            <div class="card-body" id="channelList">
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered table-sm mb-0">
+                  <thead class="sticky-top bg-light">
+                    <tr>
+                      <th>ID</th>
+                      <th>Kanal Kodu</th>
+                      <th>Açıklama</th>
+                      <th>Durum</th>
+                      <th>İşlemler</th>
+                    </tr>
+                  </thead>
+                  <tbody id="channelTableBody">
+                    <!-- Bu bölüm JavaScript ile doldurulacak -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <div class="text-muted small">
+                  <span id="channelTotalCount">Toplam: 0 kanal</span> | 
+                  <span id="channelVisibleCount">Görüntülenen: 0 kanal</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Kullanıcı Tanım Sekmesi -->
+      <div class="tab-pane fade" id="users-pane" role="tabpanel" aria-labelledby="users-tab">
+        <section id="users">
+          <div class="row align-items-center mb-4">
+            <div class="col">
+              <h1 class="header-title">Kullanıcı Tanım</h1>
+            </div>
+            <div class="col text-end">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newUserModal">
+                <i class="bi bi-plus-lg btn-icon"></i> Yeni Kullanıcı
+              </button>
+            </div>
+          </div>
+
+          <!-- Kullanıcı Filtreleme Alanı -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4 mb-2">
+                  <label for="filterUserCode" class="form-label">Kullanıcı Kodu</label>
+                  <input type="text" class="form-control" id="filterUserCode" placeholder="Kullanıcı koduna göre ara...">
+                </div>
+                <div class="col-md-4 mb-2">
+                  <label for="filterUserName" class="form-label">İsim</label>
+                  <input type="text" class="form-control" id="filterUserName" placeholder="İsme göre ara...">
+                </div>
+                <div class="col-md-4 mb-2">
+                  <label for="filterUserRole" class="form-label">Yetki Türü</label>
+                  <select class="form-select" id="filterUserRole">
+                    <option value="">Tüm Yetkiler</option>
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                    <option value="viewer">Viewer</option>
+                  </select>
+                </div>
+              </div>
+              <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-outline-secondary me-2" id="clearUserFiltersBtn">
+                  <i class="bi bi-x-circle"></i> Temizle
+                </button>
+                <button class="btn btn-primary" id="applyUserFiltersBtn">
+                  <i class="bi bi-search"></i> Filtrele
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kullanıcı Listesi -->
+          <div class="card">
+            <div class="card-body" id="userList">
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered table-sm mb-0">
+                  <thead class="sticky-top bg-light">
+                    <tr>
+                      <th>ID</th>
+                      <th>Kullanıcı Kodu</th>
+                      <th>İsim</th>
+                      <th>Yetki Türü</th>
+                      <th>Durum</th>
+                      <th>İşlemler</th>
+                    </tr>
+                  </thead>
+                  <tbody id="userTableBody">
+                    <!-- Bu bölüm JavaScript ile doldurulacak -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <div class="text-muted small">
+                  <span id="userTotalCount">Toplam: 0 kullanıcı</span> | 
+                  <span id="userVisibleCount">Görüntülenen: 0 kullanıcı</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yeni Senaryo Ekleme Modal -->
+  <div class="modal fade" id="newScenarioModal" tabindex="-1" aria-labelledby="newScenarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newScenarioModalLabel">Yeni Senaryo Oluştur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="newScenarioForm">
+            <div class="mb-3">
+              <label for="scenarioName" class="form-label">Senaryo Adı</label>
+              <input type="text" class="form-control" id="scenarioName" required>
+            </div>
+            <div class="mb-3">
+              <label for="scenarioDescription" class="form-label">Açıklama</label>
+              <textarea class="form-control" id="scenarioDescription" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="scenarioChannel" class="form-label">KANAL</label>
+              <select class="form-select" id="scenarioChannel">
+                <option value="">Kanal Seçilmedi</option>
+                <!-- Dinamik olarak JavaScript ile doldurulacak -->
+              </select>
+            </div>
+            
+            <h5 class="mt-4 mb-3">Mock Servisler</h5>
+            
+            <div id="mockServicesContainer">
+              <div class="card mb-3 service-card">
+                <div class="card-body">
+                  <h6>Mock Servis #1</h6>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Servis Adı</label>
+                      <input type="text" class="form-control" name="serviceName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">TransactionName</label>
+                      <input type="text" class="form-control" name="endpointUrl">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Çıktı Şeması / Örnek Response</label>
+                    <textarea class="form-control" name="responseData" rows="5" required></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <button type="button" class="btn btn-primary" id="addMockServiceBtn">
+              <i class="bi bi-plus-lg"></i> Yeni Mock Servis Ekle
+            </button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="saveScenario()">Senaryoyu Oluştur</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Senaryo Düzenleme Modal -->
+  <div class="modal fade" id="editScenarioModal" tabindex="-1" aria-labelledby="editScenarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editScenarioModalLabel">Senaryoyu Düzenle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editScenarioForm">
+            <input type="hidden" id="editScenarioId">
+            <div class="mb-3">
+              <label for="editScenarioName" class="form-label">Senaryo Adı</label>
+              <input type="text" class="form-control" id="editScenarioName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editScenarioDescription" class="form-label">Açıklama</label>
+              <textarea class="form-control" id="editScenarioDescription" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="editScenarioChannel" class="form-label">KANAL</label>
+              <select class="form-select" id="editScenarioChannel">
+                <option value="">Kanal Seçilmedi</option>
+                <!-- Dinamik olarak JavaScript ile doldurulacak -->
+              </select>
+            </div>
+            
+            <h5 class="mt-4 mb-3">Mock Servisler</h5>
+            
+            <div id="editMockServicesContainer">
+              <!-- Bu bölüm JavaScript ile doldurulacak -->
+            </div>
+            
+            <button type="button" class="btn btn-primary" id="editAddMockServiceBtn">
+              <i class="bi bi-plus-lg"></i> Yeni Mock Servis Ekle
+            </button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="updateScenario()">Senaryoyu Güncelle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yeni Kanal Modal -->
+  <div class="modal fade" id="newChannelModal" tabindex="-1" aria-labelledby="newChannelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newChannelModalLabel">Yeni Kanal Oluştur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="newChannelForm">
+            <div class="mb-3">
+              <label for="channelCode" class="form-label">Kanal Kodu</label>
+              <input type="text" class="form-control" id="channelCode" required placeholder="Örn: 111">
+              <div class="form-text">Sadece sayısal değer giriniz.</div>
+            </div>
+            <div class="mb-3">
+              <label for="channelDescription" class="form-label">Açıklama</label>
+              <input type="text" class="form-control" id="channelDescription" required placeholder="Örn: Enpara Bireysel Internet">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="saveChannel()">Kanalı Oluştur</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanal Düzenleme Modal -->
+  <div class="modal fade" id="editChannelModal" tabindex="-1" aria-labelledby="editChannelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editChannelModalLabel">Kanalı Düzenle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editChannelForm">
+            <input type="hidden" id="editChannelId">
+            <div class="mb-3">
+              <label for="editChannelCode" class="form-label">Kanal Kodu</label>
+              <input type="text" class="form-control" id="editChannelCode" required placeholder="Örn: 111">
+              <div class="form-text">Sadece sayısal değer giriniz.</div>
+            </div>
+            <div class="mb-3">
+              <label for="editChannelDescription" class="form-label">Açıklama</label>
+              <input type="text" class="form-control" id="editChannelDescription" required placeholder="Örn: Enpara Bireysel Internet">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="updateChannel()">Kanalı Güncelle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yeni Kullanıcı Modal -->
+  <div class="modal fade" id="newUserModal" tabindex="-1" aria-labelledby="newUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newUserModalLabel">Yeni Kullanıcı Oluştur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="newUserForm">
+            <div class="mb-3">
+              <label for="userCode" class="form-label">Kullanıcı Kodu</label>
+              <input type="text" class="form-control" id="userCode" required placeholder="Örn: admin01">
+              <div class="form-text">Benzersiz kullanıcı kodu giriniz.</div>
+            </div>
+            <div class="mb-3">
+              <label for="userName" class="form-label">İsim</label>
+              <input type="text" class="form-control" id="userName" required placeholder="Örn: Ahmet Yılmaz">
+            </div>
+            <div class="mb-3">
+              <label for="userPassword" class="form-label">Şifre</label>
+              <input type="password" class="form-control" id="userPassword" required placeholder="Güvenli şifre giriniz">
+              <div class="form-text">En az 6 karakter, en az 1 harf ve 1 rakam içermelidir.</div>
+            </div>
+            <div class="mb-3">
+              <label for="userRole" class="form-label">Yetki Türü</label>
+              <select class="form-select" id="userRole" required>
+                <option value="">Yetki Seçiniz</option>
+                <option value="admin">Admin - Tam Yetki</option>
+                <option value="user">User - Okuma/Yazma</option>
+                <option value="viewer">Viewer - Sadece Okuma</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="saveUser()">Kullanıcıyı Oluştur</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kullanıcı Düzenleme Modal -->
+  <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUserModalLabel">Kullanıcıyı Düzenle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editUserForm">
+            <input type="hidden" id="editUserId">
+            <div class="mb-3">
+              <label for="editUserCode" class="form-label">Kullanıcı Kodu</label>
+              <input type="text" class="form-control" id="editUserCode" required placeholder="Örn: admin01">
+              <div class="form-text">Benzersiz kullanıcı kodu giriniz.</div>
+            </div>
+            <div class="mb-3">
+              <label for="editUserName" class="form-label">İsim</label>
+              <input type="text" class="form-control" id="editUserName" required placeholder="Örn: Ahmet Yılmaz">
+            </div>
+            <div class="mb-3">
+              <label for="editUserPassword" class="form-label">Şifre</label>
+              <input type="password" class="form-control" id="editUserPassword" placeholder="Değiştirmek için yeni şifre giriniz">
+              <div class="form-text">Boş bırakırsanız mevcut şifre korunur. En az 6 karakter, en az 1 harf ve 1 rakam içermelidir.</div>
+            </div>
+            <div class="mb-3">
+              <label for="editUserRole" class="form-label">Yetki Türü</label>
+              <select class="form-select" id="editUserRole" required>
+                <option value="">Yetki Seçiniz</option>
+                <option value="admin">Admin - Tam Yetki</option>
+                <option value="user">User - Okuma/Yazma</option>
+                <option value="viewer">Viewer - Sadece Okuma</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="updateUser()">Kullanıcıyı Güncelle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yeni Kural Modal -->
+  <div class="modal fade" id="newRuleModal" tabindex="-1" aria-labelledby="newRuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newRuleModalLabel">Kural - Senaryo Eşleştir</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="newRuleForm">
+            <div class="mb-3">
+              <label for="ruleValue" class="form-label">Kural</label>
+              <textarea class="form-control" id="ruleValue" rows="4" style="min-height: 100px; width: 100%;" required></textarea>
+              <div class="form-text">Servisteki bag değeri verilmelidir!! Müşteri numarası, TCKN, VKN gibi değerler girilebilir.</div>
+            </div>
+            
+            <h5 class="mt-4">Senaryo Ataması</h5>
+            <div class="card mt-2">
+              <div class="card-header">
+                Mevcut Senaryolar
+              </div>
+              <div class="card-body scenario-list" id="scenarioCheckboxes">
+                <!-- JavaScript ile doldurulacak dinamik içerik -->
+              </div>
+              <div id="scenarioValidationFeedback" class="text-danger ps-3 pb-2 d-none">En az bir senaryo seçmelisiniz.</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="saveRule()">Kuralı Oluştur</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kural Düzenleme Modal -->
+  <div class="modal fade" id="editRuleModal" tabindex="-1" aria-labelledby="editRuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editRuleModalLabel">Kural - Senaryo Eşleştirme Düzenle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editRuleForm">
+            <input type="hidden" id="editRuleId">
+            <div class="mb-3">
+              <label for="editRuleValue" class="form-label">Kural</label>
+              <textarea class="form-control" id="editRuleValue" rows="4" style="min-height: 100px; width: 100%;" required></textarea>
+              <div class="form-text">Servisteki bag değeri verilmelidir!! Müşteri numarası, TCKN, VKN gibi değerler girilebilir.</div>
+            </div>
+            
+            <h5 class="mt-4">Senaryo Ataması</h5>
+            <div class="card mt-2">
+              <div class="card-header">
+                Mevcut Senaryolar
+              </div>
+              <div class="card-body scenario-list" id="editScenarioCheckboxes">
+                <!-- JavaScript ile doldurulacak dinamik içerik -->
+              </div>
+              <div id="editScenarioValidationFeedback" class="text-danger ps-3 pb-2 d-none">En az bir senaryo seçmelisiniz.</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="updateRule()">Kuralı Güncelle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Senaryo için Kural Ekleme Modal -->
+  <div class="modal fade" id="addRuleForScenarioModal" tabindex="-1" aria-labelledby="addRuleForScenarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addRuleForScenarioLabel">Kural - Senaryo Eşleştir</h5>
+          <button type="button" class="btn-close" onclick="closeAddRuleModal()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addRuleForScenarioForm">
+            <input type="hidden" id="ruleScenarioId">
+            <div class="mb-3">
+              <label class="form-label">Senaryo</label>
+              <div class="p-2 mb-2 bg-light rounded">
+                <strong id="ruleScenarioName"></strong>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="ruleDefinition" class="form-label">Kural Tanımı</label>
+              <textarea class="form-control" id="ruleDefinition" rows="4" style="min-height: 100px; width: 100%;" required></textarea>
+              <div class="form-text">Servisteki bag değeri verilmelidir!! Müşteri numarası, TCKN, VKN gibi değerler girilebilir.</div>
+              <div id="ruleDefinitionFeedback" class="text-danger mt-1 d-none">Kural tanımı gereklidir.</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeAddRuleModal()">İptal</button>
+          <button type="button" class="btn btn-primary" onclick="saveRuleForScenario()">Kuralı Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="memorybank.js"></script>
+  
+  <!-- MCP DuckDB Integration -->
+  <script>
+    // MCP DuckDB Client Integration - SIMPLIFIED FOR TESTING
+    window.MCPClient = {
+      async query(sql) {
+        console.log('🔗 MCP Query (MOCK):', sql);
+        // Mock response for testing
+        return { success: false, error: 'MCP disabled for testing' };
+      }
+    };
+    
+    console.log('🔗 MCP Client initialized (MOCK MODE)');
+  </script>
+  
+  <!-- MINIMAL AUTHENTICATION SYSTEM -->
+  <script>
+    // Global debug log system (optional - can be disabled in production)
+    let globalDebugLogs;
+    try {
+      globalDebugLogs = JSON.parse(localStorage.getItem('mockaverse_debug_logs') || '[]');
+    } catch (e) {
+      globalDebugLogs = [];
+    }
+
+    function debugLog(message, type = 'INFO') {
+      // Uncomment for debugging when needed
+      // try {
+      //   const timestamp = new Date().toISOString();
+      //   const logEntry = `[${timestamp}] [${type}] INDEX: ${message}`;
+      //   globalDebugLogs.push(logEntry);
+      //   if (globalDebugLogs.length > 100) {
+      //     globalDebugLogs = globalDebugLogs.slice(-100);
+      //   }
+      //   localStorage.setItem('mockaverse_debug_logs', JSON.stringify(globalDebugLogs));
+      // } catch (e) {
+      //   console.error('Debug log error:', e);
+      // }
+    }
+    
+    function checkAuthentication() {
+      // Check for session tokens
+      const sessionToken = localStorage.getItem('mockaverse_session') || sessionStorage.getItem('mockaverse_session');
+      const userInfo = localStorage.getItem('mockaverse_user') || sessionStorage.getItem('mockaverse_user');
+      
+      if (sessionToken && userInfo) {
+        try {
+          // Basic validation
+          const decodedToken = atob(sessionToken);
+          const [tokenData, signature] = decodedToken.split('.');
+          const tokenPayload = JSON.parse(tokenData);
+          
+          // Check expiry
+          if (tokenPayload.expiry && Date.now() > tokenPayload.expiry) {
+            return false;
+          }
+          
+          const user = JSON.parse(userInfo);
+          
+          // Update user display
+          const userElement = document.getElementById('currentUser');
+          if (userElement) {
+            userElement.textContent = user.fullName || user.username;
+          }
+          
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+      
+      return false;
+    }
+    
+    // Logout function
+    function logout() {
+      if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+        // Clear all session data
+        localStorage.removeItem('mockaverse_session');
+        sessionStorage.removeItem('mockaverse_session');
+        localStorage.removeItem('mockaverse_user');
+        sessionStorage.removeItem('mockaverse_user');
+        
+        // Redirect to login
+        window.location.href = 'login.html';
+      }
+    }
+    
+    // Get current user role
+    function getCurrentUserRole() {
+      try {
+        const userInfo = localStorage.getItem('mockaverse_user');
+        if (userInfo) {
+          const user = JSON.parse(userInfo);
+          return user.role || 'viewer';
+        }
+      } catch (error) {
+        console.error('Error getting user role:', error);
+      }
+      return 'viewer'; // Default to most restrictive role
+    }
+
+    // Apply role-based access control
+    function applyRoleBasedAccess() {
+      const userRole = getCurrentUserRole();
+      console.log('Applying role-based access for role:', userRole);
+      
+      // Get all tabs
+      const channelsTab = document.getElementById('channels-tab');
+      const usersTab = document.getElementById('users-tab');
+      const channelsPane = document.getElementById('channels-pane');
+      const usersPane = document.getElementById('users-pane');
+      
+      // Get action buttons
+      const newScenarioBtn = document.querySelector('[data-bs-target="#newScenarioModal"]');
+      const newRuleBtn = document.querySelector('[data-bs-target="#newRuleModal"]');
+      const newChannelBtn = document.querySelector('[data-bs-target="#newChannelModal"]');
+      const newUserBtn = document.querySelector('[data-bs-target="#newUserModal"]');
+      
+      if (userRole === 'admin') {
+        // Admin: Full access - show all tabs and enable all actions
+        // All tabs are visible by default, no restrictions
+        console.log('✅ Admin access: Full permissions granted');
+        
+      } else if (userRole === 'user') {
+        // User: Limited access - hide Kanal Tanım and Kullanıcı Tanım tabs
+        if (channelsTab) channelsTab.style.display = 'none';
+        if (usersTab) usersTab.style.display = 'none';
+        if (channelsPane) channelsPane.style.display = 'none';
+        if (usersPane) usersPane.style.display = 'none';
+        
+        // Hide channel and user management buttons
+        if (newChannelBtn) newChannelBtn.style.display = 'none';
+        if (newUserBtn) newUserBtn.style.display = 'none';
+        
+        // User can perform actions in visible tabs
+        console.log('✅ User access: Limited to Scenarios and Rules tabs');
+        
+      } else if (userRole === 'viewer') {
+        // Viewer: Read-only access - hide management tabs and disable action buttons
+        if (channelsTab) channelsTab.style.display = 'none';
+        if (usersTab) usersTab.style.display = 'none';
+        if (channelsPane) channelsPane.style.display = 'none';
+        if (usersPane) usersPane.style.display = 'none';
+        
+        // Disable all action buttons for viewer
+        if (newScenarioBtn) newScenarioBtn.style.display = 'none';
+        if (newRuleBtn) newRuleBtn.style.display = 'none';
+        if (newChannelBtn) newChannelBtn.style.display = 'none';
+        if (newUserBtn) newUserBtn.style.display = 'none';
+        
+        // Hide edit/delete buttons in tables (will be handled in table generation)
+        console.log('✅ Viewer access: Read-only permissions');
+      }
+    }
+
+    // DOM ready check
+    document.addEventListener('DOMContentLoaded', function() {
+      const authResult = checkAuthentication();
+      
+      if (!authResult) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Apply role-based access control
+      applyRoleBasedAccess();
+      
+      // Initialize scenario management after authentication
+      initScenarioManagement();
+      
+      // Initialize UI enhancements
+      initUIEnhancements();
+      
+      // Debug: Test modal functionality
+      console.log('🔍 Testing modal elements...');
+      const modal = document.getElementById('newScenarioModal');
+      const modalBtn = document.querySelector('[data-bs-target="#newScenarioModal"]');
+      console.log('Modal exists:', !!modal);
+      console.log('Modal button exists:', !!modalBtn);
+      
+      if (modalBtn) {
+        console.log('Modal button classes:', modalBtn.className);
+        console.log('Modal button data-bs-toggle:', modalBtn.getAttribute('data-bs-toggle'));
+        console.log('Modal button data-bs-target:', modalBtn.getAttribute('data-bs-target'));
+      }
+      
+      // Test Bootstrap Modal functionality
+      if (modal && typeof bootstrap !== 'undefined') {
+        console.log('✅ Bootstrap loaded, modal should work');
+      } else {
+        console.error('❌ Bootstrap not loaded or modal missing');
+      }
+    });
+  </script>
+  
+  <!-- SCENARIO MANAGEMENT SYSTEM -->
+  <script>
+    // Global scenario, rule and channel data
+    let scenarios = [];
+    let rules = [];
+    let channels = [];
+    let mockServiceCount = 1;
+    let editMockServiceCount = 1;
+    
+    // Initialize scenario management
+    function initScenarioManagement() {
+      console.log('🚀 Initializing Scenario Management System...');
+      
+      // Load data from localStorage
+      loadFromLocalStorage();
+      
+      // Set up event listeners for scenario management
+      setupScenarioEventListeners();
+      
+      console.log('✅ Scenario Management System initialized');
+    }
+    
+    // Setup event listeners
+    function setupScenarioEventListeners() {
+      // New scenario modal events
+      const newScenarioModal = document.getElementById('newScenarioModal');
+      if (newScenarioModal) {
+        newScenarioModal.addEventListener('shown.bs.modal', function() {
+          document.getElementById('scenarioName').focus();
+        });
+      }
+      
+      // Add Mock Service button event
+      const addMockServiceBtn = document.getElementById('addMockServiceBtn');
+      if (addMockServiceBtn) {
+        addMockServiceBtn.addEventListener('click', function() {
+          addMockService();
+        });
+        console.log('✅ addMockServiceBtn event listener added');
+      }
+      
+      // Edit scenario - Add Mock Service button event  
+      const editAddMockServiceBtn = document.getElementById('editAddMockServiceBtn');
+      if (editAddMockServiceBtn) {
+        editAddMockServiceBtn.addEventListener('click', function() {
+          addEditMockService();
+        });
+        console.log('✅ editAddMockServiceBtn event listener added');
+      }
+      
+      // Scenario table event delegation for edit/delete buttons
+      const scenarioTableBody = document.getElementById('scenarioTableBody');
+      if (scenarioTableBody) {
+        scenarioTableBody.addEventListener('click', function(e) {
+          if (e.target.closest('.edit-scenario')) {
+            const scenarioId = parseInt(e.target.closest('.edit-scenario').getAttribute('data-scenario-id'));
+            editScenario(scenarioId);
+          } else if (e.target.closest('.delete-scenario')) {
+            const scenarioId = parseInt(e.target.closest('.delete-scenario').getAttribute('data-scenario-id'));
+            deleteScenario(scenarioId);
+          }
+        });
+        console.log('✅ Scenario table event delegation added');
+      }
+      
+      // Filter buttons event handlers
+      const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+      if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', function() {
+          applyFilters();
+        });
+        console.log('✅ applyFiltersBtn event listener added');
+      }
+      
+      const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+      if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', function() {
+          clearFilters();
+        });
+        console.log('✅ clearFiltersBtn event listener added');
+      }
+      
+      // Enter key support for filter inputs
+      const filterInputs = ['filterScenarioName', 'filterServiceName', 'filterTransactionName'];
+      filterInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+          input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+              applyFilters();
+            }
+          });
+        }
+      });
+      console.log('✅ Filter inputs Enter key support added');
+    }
+    
+    // LocalStorage functions
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('mockverse_scenarios', JSON.stringify(scenarios));
+        localStorage.setItem('mockverse_rules', JSON.stringify(rules));
+        console.log('✅ Data saved to localStorage');
+      } catch (e) {
+        console.error('❌ Error saving to localStorage:', e);
+      }
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const savedScenarios = localStorage.getItem('mockverse_scenarios');
+        const savedRules = localStorage.getItem('mockverse_rules');
+        
+        if (savedScenarios) {
+          scenarios = JSON.parse(savedScenarios);
+          console.log(`📊 Loaded ${scenarios.length} scenarios from localStorage`);
+        }
+        
+        if (savedRules) {
+          const parsedRules = JSON.parse(savedRules);
+          if (Array.isArray(parsedRules)) {
+            rules = parsedRules;
+            console.log(`📋 Loaded ${rules.length} rules from localStorage`);
+          }
+        }
+        
+        // Update displays
+        updateScenarioList();
+        updateRuleList();
+        updateHeaderScenarioList();
+        
+      } catch (e) {
+        console.error('❌ Error loading from localStorage:', e);
+        scenarios = [];
+        rules = [];
+      }
+    }
+    
+    // Main scenario saving function - GLOBAL SCOPE
+    window.saveScenario = async function() {
+      console.log('💾 Starting saveScenario...');
+      
+      const form = document.getElementById('newScenarioForm');
+      if (!form) {
+        console.error('❌ newScenarioForm not found');
+        alert('Form bulunamadı!');
+        return;
+      }
+      
+      if (form.checkValidity()) {
+        // Get scenario information
+        const name = document.getElementById('scenarioName').value;
+        const description = document.getElementById('scenarioDescription').value;
+        const channel = document.getElementById('scenarioChannel').value;
+        
+        console.log('📝 Scenario data:', {name, description, channel});
+        
+        // Check for duplicate names
+        const existingScenario = scenarios.find(s => s.name.toLowerCase() === name.toLowerCase() && s.status !== 0);
+        
+        if (existingScenario) {
+          alert(`Bu isimde bir senaryo zaten mevcut! (Senaryo ID: ${existingScenario.id})\nLütfen farklı bir isim giriniz.`);
+          return;
+        }
+        
+        // Get mock services
+        const mockServices = [];
+        const serviceCards = document.querySelectorAll('#mockServicesContainer .service-card');
+        
+        console.log(`🔧 Found ${serviceCards.length} mock service cards`);
+        
+        serviceCards.forEach((card, index) => {
+          const serviceName = card.querySelector('[name="serviceName"]').value;
+          const endpointUrl = card.querySelector('[name="endpointUrl"]').value;
+          const responseData = card.querySelector('[name="responseData"]').value;
+          
+          console.log(`Service ${index + 1}:`, {serviceName, endpointUrl});
+          
+          mockServices.push({
+            serviceName,
+            endpointUrl,
+            responseData
+          });
+        });
+        
+        // Create new scenario ID
+        let maxId = 0;
+        if (scenarios.length > 0) {
+          maxId = Math.max(...scenarios.map(s => s.id));
+        }
+        const newId = maxId + 1;
+        
+        // Create new scenario object
+        const newScenario = {
+          id: newId,
+          name,
+          description,
+          channel,
+          status: 1,
+          mockServices,
+          createdAt: new Date().toISOString()
+        };
+        
+        console.log('🎯 New scenario created:', newScenario);
+        
+        // Add to scenarios array
+        scenarios.push(newScenario);
+        
+        // Update displays
+        updateScenarioList();
+        updateHeaderScenarioList();
+        
+        // Save to localStorage
+        saveToLocalStorage();
+        
+        // Reset form
+        form.reset();
+        mockServiceCount = 1;
+        
+        // Clean mock services container
+        const container = document.getElementById('mockServicesContainer');
+        if (container) {
+          while (container.children.length > 1) {
+            container.removeChild(container.lastChild);
+          }
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('newScenarioModal'));
+        if (modal) {
+          modal.hide();
+        }
+        
+        // Success message
+        alert(`✅ Senaryo "${name}" başarıyla kaydedildi!\nSenaryo ID: ${newId}`);
+        console.log('✅ saveScenario completed successfully');
+        
+      } else {
+        console.log('❌ Form validation failed');
+                 form.reportValidity();
+       }
+     };
+     
+     // ===== PHASE 3: UI ENHANCEMENTS & ERROR HANDLING =====
+     
+           // Enhanced updateScenarioList with PAGINATION (MAX 10 RECORDS)
+      function updateScenarioList() {
+        console.log('🔄 Enhanced updating scenario list with pagination...');
+        
+        // Get active scenarios
+        const activeScenarios = scenarios.filter(s => s.status !== 0);
+        console.log(`📊 Active scenarios: ${activeScenarios.length}`);
+        
+        // Get scenario table body
+        const scenarioTableBody = document.getElementById('scenarioTableBody');
+        if (!scenarioTableBody) {
+          console.error('❌ scenarioTableBody element not found');
+          return;
+        }
+        
+        // Clear table content
+        scenarioTableBody.innerHTML = '';
+        
+        // Show info message if no scenarios
+        if (activeScenarios.length === 0) {
+          const userRole = getCurrentUserRole();
+          let createButton = '';
+          
+          if (userRole === 'admin' || userRole === 'user') {
+            createButton = `
+              <div class="mt-2">
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newScenarioModal">
+                  <i class="bi bi-plus-lg me-1"></i> İlk Senaryoyu Oluştur
+                </button>
+              </div>
+            `;
+          }
+          
+          scenarioTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center py-3">
+                <div class="alert alert-info mb-0">
+                  <i class="bi bi-info-circle me-2"></i> 
+                  Henüz hiç senaryo oluşturulmamış.
+                  ${createButton}
+                </div>
+              </td>
+            </tr>
+          `;
+          updateScenarioCounts(0, 0);
+          
+          // Hide pagination when no scenarios
+          const paginationContainer = document.getElementById('scenarioPagination');
+          if (paginationContainer) {
+            paginationContainer.style.display = 'none';
+          }
+          return;
+        }
+        
+        // Create table rows for ALL scenarios (pagination will hide/show them)
+        activeScenarios.forEach(scenario => {
+          const serviceNames = scenario.mockServices.map(s => s.serviceName).join(', ');
+          const transactionNames = scenario.mockServices.map(s => s.endpointUrl).join(', ');
+          
+          const row = document.createElement('tr');
+          row.className = 'scenario-row';
+          row.setAttribute('data-scenario-id', scenario.id);
+          
+          // Check user role for action buttons
+          const userRole = getCurrentUserRole();
+          let actionButtons = '';
+          
+          if (userRole === 'admin' || userRole === 'user') {
+            // Admin and User can edit and delete
+            actionButtons = `
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-primary edit-scenario" data-scenario-id="${scenario.id}" title="Düzenle">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger delete-scenario" data-scenario-id="${scenario.id}" title="Sil">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            `;
+          } else {
+            // Viewer: read-only
+            actionButtons = '<span class="text-muted small">Sadece Görüntüleme</span>';
+          }
+
+          row.innerHTML = `
+            <td><span class="badge bg-secondary">${scenario.id}</span></td>
+            <td><strong>${scenario.name}</strong></td>
+            <td><small class="text-muted">${serviceNames}</small></td>
+            <td><small class="text-muted">${transactionNames}</small></td>
+            <td>${scenario.channel ? `<span class="badge bg-secondary">${scenario.channel}</span>` : '-'}</td>
+            <td>${actionButtons}</td>
+          `;
+          
+          scenarioTableBody.appendChild(row);
+        });
+        
+        // Setup pagination (MAX 10 records per page)
+        setupScenarioPagination();
+        
+        // Show first page
+        showScenarioPage(1);
+        
+        console.log('✅ Enhanced scenario list with pagination updated');
+      }
+      
+      // Setup Scenario Pagination (MAX 10 RECORDS)
+      function setupScenarioPagination() {
+        // Get active scenarios
+        const activeScenarios = scenarios.filter(s => s.status !== 0);
+        const itemsPerPage = 10; // MAX 10 RECORDS as requested
+        const totalPages = Math.ceil(activeScenarios.length / itemsPerPage);
+        
+        console.log(`📄 Pagination setup: ${activeScenarios.length} scenarios, ${itemsPerPage} per page, ${totalPages} total pages`);
+        
+        // Get pagination container
+        const paginationContainer = document.getElementById('scenarioPagination');
+        if (!paginationContainer) {
+          console.error('❌ scenarioPagination element not found');
+          return;
+        }
+        
+        // Hide pagination if only 1 page or less
+        if (totalPages <= 1) {
+          paginationContainer.style.display = 'none';
+          updateScenarioCounts(activeScenarios.length, activeScenarios.length);
+          return;
+        }
+        
+        // Show pagination container
+        paginationContainer.style.display = '';
+        
+        // Build pagination HTML
+        let paginationHTML = `
+          <nav aria-label="Senaryo sayfaları">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item disabled" id="scenarioPrevPage">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+              <li class="page-item active">
+                <a class="page-link" href="#" data-page="1">1</a>
+              </li>
+        `;
+        
+        // Add page numbers
+        if (totalPages > 1) {
+          for (let i = 2; i <= Math.min(totalPages, 5); i++) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+          }
+          
+          // Add ellipsis and last page if needed
+          if (totalPages > 5) {
+            paginationHTML += `
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+              <li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>
+            `;
+          }
+        }
+        
+        // Add next button
+        paginationHTML += `
+              <li class="page-item ${totalPages <= 1 ? 'disabled' : ''}" id="scenarioNextPage">
+                <a class="page-link" href="#">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        `;
+        
+        // Set pagination HTML
+        paginationContainer.innerHTML = paginationHTML;
+        
+        // Setup page events
+        setupScenarioPageEvents(totalPages);
+        
+        console.log('✅ Pagination setup completed');
+      }
+      
+      // Show Scenario Page (MAX 10 RECORDS)
+      function showScenarioPage(page) {
+        const rows = document.querySelectorAll('#scenarioTableBody .scenario-row');
+        const itemsPerPage = 10; // MAX 10 RECORDS as requested
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        
+        console.log(`📄 Showing page ${page}: rows ${startIndex}-${endIndex - 1}`);
+        
+        // Hide/show rows based on page
+        rows.forEach((row, index) => {
+          if (index >= startIndex && index < endIndex) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Update visible count
+        const visibleCount = Math.min(itemsPerPage, rows.length - startIndex);
+        const totalCount = scenarios.filter(s => s.status !== 0).length;
+        
+        updateScenarioCounts(visibleCount, totalCount);
+        
+        console.log(`✅ Page ${page} displayed: ${visibleCount} visible records`);
+      }
+      
+      // Setup Scenario Page Events
+      function setupScenarioPageEvents(totalPages) {
+        const pageLinks = document.querySelectorAll('#scenarioPagination .page-link[data-page]');
+        const prevPageBtn = document.getElementById('scenarioPrevPage');
+        const nextPageBtn = document.getElementById('scenarioNextPage');
+        
+        let currentPage = 1;
+        
+        // Page link events
+        pageLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(this.getAttribute('data-page'));
+            if (page) {
+              showScenarioPage(page);
+              
+              // Update active page styling
+              document.querySelectorAll('#scenarioPagination .page-item').forEach(item => {
+                item.classList.remove('active');
+              });
+              this.parentElement.classList.add('active');
+              currentPage = page;
+              
+              // Update prev/next button states
+              prevPageBtn.classList.toggle('disabled', page === 1);
+              nextPageBtn.classList.toggle('disabled', page === totalPages);
+            }
+          });
+        });
+        
+        // Previous page button
+        if (prevPageBtn) {
+          prevPageBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+              showScenarioPage(currentPage - 1);
+              
+              // Update active page
+              const newActivePage = document.querySelector(`#scenarioPagination .page-link[data-page="${currentPage - 1}"]`);
+              if (newActivePage) {
+                document.querySelectorAll('#scenarioPagination .page-item').forEach(item => {
+                  item.classList.remove('active');
+                });
+                newActivePage.parentElement.classList.add('active');
+              }
+              
+              currentPage--;
+              prevPageBtn.classList.toggle('disabled', currentPage === 1);
+              nextPageBtn.classList.toggle('disabled', currentPage === totalPages);
+            }
+          });
+        }
+        
+        // Next page button
+        if (nextPageBtn) {
+          nextPageBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+              showScenarioPage(currentPage + 1);
+              
+              // Update active page
+              const newActivePage = document.querySelector(`#scenarioPagination .page-link[data-page="${currentPage + 1}"]`);
+              if (newActivePage) {
+                document.querySelectorAll('#scenarioPagination .page-item').forEach(item => {
+                  item.classList.remove('active');
+                });
+                newActivePage.parentElement.classList.add('active');
+              }
+              
+              currentPage++;
+              prevPageBtn.classList.toggle('disabled', currentPage === 1);
+              nextPageBtn.classList.toggle('disabled', currentPage === totalPages);
+            }
+          });
+        }
+        
+        console.log('✅ Pagination event handlers setup completed');
+      }
+      
+      // Update Scenario Counts
+      function updateScenarioCounts(visibleCount, totalCount) {
+        const totalCountElement = document.getElementById('scenarioTotalCount');
+        const visibleCountElement = document.getElementById('scenarioVisibleCount');
+        
+        if (totalCountElement) {
+          totalCountElement.textContent = `Toplam: ${totalCount} senaryo`;
+        }
+        
+        if (visibleCountElement) {
+          visibleCountElement.textContent = `Görüntülenen: ${visibleCount} senaryo`;
+        }
+        
+        console.log(`📊 Counts updated: ${visibleCount}/${totalCount} scenarios`);
+      }
+     
+     // Enhanced form validation
+     function validateScenarioForm(formId) {
+       const form = document.getElementById(formId);
+       if (!form) return false;
+       
+       const name = form.querySelector('[name="scenarioName"], #editScenarioName')?.value?.trim();
+       const services = form.querySelectorAll('[name="serviceName"], [name="editServiceName"]');
+       
+       let isValid = true;
+       let errors = [];
+       
+       // Validate scenario name
+       if (!name || name.length < 3) {
+         errors.push('Senaryo adı en az 3 karakter olmalıdır');
+         isValid = false;
+       }
+       
+       // Validate services
+       if (services.length === 0) {
+         errors.push('En az bir mock servis eklemelisiniz');
+         isValid = false;
+       }
+       
+       // Check each service
+       services.forEach((serviceInput, index) => {
+         if (!serviceInput.value.trim()) {
+           errors.push(`${index + 1}. servis adı boş olamaz`);
+           isValid = false;
+         }
+       });
+       
+       // Show errors if any
+       if (!isValid) {
+         alert('⚠️ Form Validation Hatası:\n' + errors.join('\n'));
+       }
+       
+       return isValid;
+     }
+     
+     // Success notifications
+     function showSuccessMessage(message, duration = 3000) {
+       // Create success toast
+       const toast = document.createElement('div');
+       toast.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible fade show';
+       toast.style.zIndex = '9999';
+       toast.innerHTML = `
+         <i class="bi bi-check-circle me-2"></i>
+         ${message}
+         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+       `;
+       
+       document.body.appendChild(toast);
+       
+       // Auto remove after duration
+       setTimeout(() => {
+         if (toast.parentNode) {
+           toast.remove();
+         }
+       }, duration);
+     }
+     
+     // Error notifications
+     function showErrorMessage(message, duration = 5000) {
+       const toast = document.createElement('div');
+       toast.className = 'position-fixed top-0 end-0 m-3 alert alert-danger alert-dismissible fade show';
+       toast.style.zIndex = '9999';
+       toast.innerHTML = `
+         <i class="bi bi-exclamation-triangle me-2"></i>
+         ${message}
+         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+       `;
+       
+       document.body.appendChild(toast);
+       
+       setTimeout(() => {
+         if (toast.parentNode) {
+           toast.remove();
+         }
+       }, duration);
+     }
+     
+     // Loading state management
+     function setButtonLoading(buttonElement, isLoading) {
+       if (isLoading) {
+         buttonElement.disabled = true;
+         buttonElement.innerHTML = `
+           <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+           İşleniyor...
+         `;
+       } else {
+         buttonElement.disabled = false;
+         // Restore original content would need to be handled by caller
+       }
+     }
+     
+     // Real-time search (debounced)
+     let searchTimeout;
+     function setupRealtimeSearch() {
+       const searchInputs = ['filterScenarioName', 'filterServiceName', 'filterTransactionName'];
+       
+       searchInputs.forEach(inputId => {
+         const input = document.getElementById(inputId);
+         if (input) {
+           input.addEventListener('input', function() {
+             clearTimeout(searchTimeout);
+             searchTimeout = setTimeout(() => {
+               if (this.value.trim().length > 2 || this.value.trim().length === 0) {
+                 applyFilters();
+               }
+             }, 500); // 500ms debounce
+           });
+         }
+       });
+       
+       console.log('✅ Real-time search setup completed');
+     }
+     
+     // Initialize UI enhancements
+     function initUIEnhancements() {
+       setupRealtimeSearch();
+       console.log('✅ UI Enhancements initialized');
+     }
+    
+    
+    // Update header scenario list (placeholder)
+    function updateHeaderScenarioList() {
+      // This will be implemented when header scenario display is needed
+      console.log('📋 Header scenario list updated');
+    }
+    
+    // Update Rule List - REAL IMPLEMENTATION
+    function updateRuleList() {
+      console.log('📋 Updating rule list...');
+      
+      const ruleContainer = document.getElementById('ruleList');
+      
+      if (!ruleContainer) {
+        console.error('❌ ruleList container not found');
+        return;
+      }
+      
+      // Ensure rules is an array
+      if (!Array.isArray(rules)) {
+        console.error('⚠️ rules is not an array, initializing as empty array');
+        rules = [];
+      }
+      
+      console.log(`📊 Total rules: ${rules.length}`);
+      
+      // Setup filter button event listeners
+      setupRuleFilterListeners();
+      
+      // Render all rules initially
+      renderRuleList(rules);
+      
+      console.log(`✅ Rule list updated with ${rules.length} rules`);
+    }
+    
+    // Setup Rule Filter Event Listeners
+    function setupRuleFilterListeners() {
+      const applyRuleFilterBtn = document.getElementById('applyRuleFilterBtn');
+      const clearRuleFilterBtn = document.getElementById('clearRuleFilterBtn');
+      const filterRuleInput = document.getElementById('filterRuleText');
+      
+      // Remove existing listeners to prevent duplicates
+      if (applyRuleFilterBtn) {
+        applyRuleFilterBtn.removeEventListener('click', filterRules);
+        applyRuleFilterBtn.addEventListener('click', filterRules);
+      }
+      
+      if (clearRuleFilterBtn) {
+        clearRuleFilterBtn.removeEventListener('click', clearRuleFilter);
+        clearRuleFilterBtn.addEventListener('click', clearRuleFilter);
+      }
+      
+      if (filterRuleInput) {
+        filterRuleInput.removeEventListener('keyup', handleRuleFilterKeyup);
+        filterRuleInput.addEventListener('keyup', handleRuleFilterKeyup);
+      }
+      
+      console.log('🔧 Rule filter listeners setup complete');
+    }
+    
+    // Clear rule filter function  
+    function clearRuleFilter() {
+      console.log('🧹 Clearing rule filter...');
+      
+      const filterRuleInput = document.getElementById('filterRuleText');
+      if (filterRuleInput) {
+        filterRuleInput.value = '';
+      }
+      
+      // Show all rules
+      renderRuleList(rules);
+    }
+    
+    // Handle keyup event on rule filter input
+    function handleRuleFilterKeyup(event) {
+      if (event.key === 'Enter') {
+        filterRules();
+      }
+    }
+    
+    // Delete Rule function - GLOBAL SCOPE
+    window.deleteRule = function(ruleId) {
+      if (confirm('Bu kuralı silmek istediğinizden emin misiniz?')) {
+        const index = rules.findIndex(r => r.id === ruleId);
+        if (index !== -1) {
+          rules.splice(index, 1); // Remove from array
+          updateRuleList();
+          saveToLocalStorage();
+          alert('✅ Kural başarıyla silindi!');
+          console.log(`🗑️ Rule deleted: ${ruleId}`);
+        }
+      }
+    };
+    
+    // Edit Rule function - GLOBAL SCOPE
+    window.editRule = function(ruleId) {
+      console.log('✏️ Edit rule called for:', ruleId);
+      
+      const rule = rules.find(r => r.id === ruleId);
+      
+      if (!rule) {
+        console.error(`❌ Rule with ID ${ruleId} not found!`);
+        alert('❌ Kural bulunamadı!');
+        return;
+      }
+      
+      console.log('📝 Found rule:', rule);
+      
+      // Modal element
+      const modalElement = document.getElementById('editRuleModal');
+      if (!modalElement) {
+        console.error('❌ Edit rule modal not found!');
+        alert('❌ Düzenleme modalı bulunamadı!');
+        return;
+      }
+      
+      // Set form values first
+      document.getElementById('editRuleId').value = rule.id;
+      document.getElementById('editRuleValue').value = rule.ruleValue;
+      
+      // Create modal instance
+      const modal = new bootstrap.Modal(modalElement);
+      
+      // Add one-time event listener for when modal is shown
+      modalElement.addEventListener('shown.bs.modal', function onEditModalShown() {
+        console.log('📝 Edit rule modal shown, rendering checkboxes...');
+        
+        // Get active scenarios
+        const activeScenarios = scenarios.filter(s => s.status !== 0);
+        console.log('📋 Active scenarios:', activeScenarios.length);
+        console.log('🎯 Selected scenarios:', rule.assignedScenarios);
+        
+        const container = document.getElementById('editScenarioCheckboxes');
+        if (!container) {
+          console.error('❌ editScenarioCheckboxes container not found!');
+          return;
+        }
+        
+        // If no scenarios, show warning
+        if (!activeScenarios || activeScenarios.length === 0) {
+          container.innerHTML = `
+            <div class="alert alert-warning my-2">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Henüz hiç senaryo tanımlanmamış. Önce senaryo eklemelisiniz!
+            </div>
+          `;
+          return;
+        }
+        
+        // Build checkboxes HTML
+        let checkboxHtml = '';
+        
+        activeScenarios.forEach(scenario => {
+          const isChecked = rule.assignedScenarios && rule.assignedScenarios.includes(scenario.id);
+          checkboxHtml += `
+            <div class="form-check py-2">
+              <input class="form-check-input" type="checkbox" value="${scenario.id}" 
+                     id="editScenarioCheckbox_${scenario.id}" ${isChecked ? 'checked' : ''}>
+              <label class="form-check-label" for="editScenarioCheckbox_${scenario.id}">
+                <strong>${scenario.name}</strong> 
+                <small class="text-muted">(ID: ${scenario.id})</small><br>
+                <span class="small text-muted">${scenario.description || 'Açıklama yok'}</span>
+              </label>
+            </div>
+          `;
+        });
+        
+        // Set container content
+        container.innerHTML = checkboxHtml;
+        
+        // Debug checkbox count
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        console.log(`✅ Rendered ${checkboxes.length} checkboxes for edit modal`);
+        
+        // Remove event listener (one-time use)
+        modalElement.removeEventListener('shown.bs.modal', onEditModalShown);
+      });
+      
+      // Show modal
+      modal.show();
+    };
+    
+    // Escape HTML function
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // ===== RULE FILTERING FUNCTIONS =====
+    
+    // Filter Rules function - GLOBAL SCOPE  
+    window.filterRules = function() {
+      console.log('🔍 Filtering rules...');
+      
+      const filterText = document.getElementById('filterRuleText')?.value.toLowerCase().trim() || '';
+      
+      if (!filterText) {
+        // No filter, show all rules
+        renderRuleList(rules);
+        return;
+      }
+      
+      // Search in rules
+      const filteredRules = rules.filter(rule => {
+        // Search in rule text
+        if (rule.ruleValue.toLowerCase().includes(filterText)) {
+          return true;
+        }
+        
+        // Search in assigned scenario names
+        const assignedScenarios = rule.assignedScenarios || [];
+        const matchingScenarios = assignedScenarios.some(id => {
+          const scenario = scenarios.find(s => s.id === id && s.status !== 0);
+          return scenario && scenario.name.toLowerCase().includes(filterText);
+        });
+        
+        return matchingScenarios;
+      });
+      
+      console.log(`🔍 Filter "${filterText}": ${filteredRules.length}/${rules.length} rules found`);
+      
+      // Show filtered rules
+      renderRuleList(filteredRules, filterText);
+    };
+    
+    // Render Rule List function
+    function renderRuleList(rulesToRender, filterText = '') {
+      const ruleContainer = document.getElementById('ruleList');
+      
+      if (!ruleContainer) {
+        console.error('❌ ruleList container not found');
+        return;
+      }
+      
+      if (!rulesToRender || rulesToRender.length === 0) {
+        if (filterText) {
+          ruleContainer.innerHTML = `
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              "<strong>${filterText}</strong>" içeren kural bulunamadı.
+            </div>
+          `;
+        } else {
+          ruleContainer.innerHTML = `
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Henüz hiç kural tanımlanmamış. Yeni bir kural ekleyin.
+            </div>
+          `;
+        }
+        return;
+      }
+      
+      // Build rules HTML
+      let html = '<div class="row">';
+      
+      rulesToRender.forEach(rule => {
+        // Get assigned scenario names (only active ones)
+        const assignedScenarioNames = rule.assignedScenarios.map(id => {
+          const scenario = scenarios.find(s => s.id === id && s.status !== 0);
+          return scenario ? scenario.name : null;
+        }).filter(name => name !== null);
+        
+        // Build scenario list HTML
+        let scenarioListHtml = '';
+        if (assignedScenarioNames.length > 0) {
+          scenarioListHtml = `
+            <ul class="list-group list-group-flush">
+              ${assignedScenarioNames.map(name => `<li class="list-group-item py-1 small">${name}</li>`).join('')}
+            </ul>
+          `;
+        } else {
+          scenarioListHtml = '<p class="text-muted mb-0 small">Atanmış senaryo yok</p>';
+        }
+        
+        // Escape HTML characters
+        const escapedRuleValue = escapeHtml(rule.ruleValue);
+        
+        // Highlight filter text if exists
+        let highlightedRuleValue = escapedRuleValue;
+        if (filterText) {
+          const regex = new RegExp(`(${escapeRegex(filterText)})`, 'gi');
+          highlightedRuleValue = escapedRuleValue.replace(regex, '<mark class="bg-warning">$1</mark>');
+        }
+        
+        html += `
+          <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+              <div class="card-header bg-light">
+                <span class="fw-bold">
+                  <i class="bi bi-filter-square"></i> Kural
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="mb-3 p-2 bg-light rounded border">
+                  <code class="text-dark" style="white-space: pre-wrap; word-break: break-word; font-size: 0.9em;">${highlightedRuleValue}</code>
+                </div>
+                <h6 class="border-bottom pb-2 mb-2">
+                  <i class="bi bi-list-check"></i> Atanan Senaryolar
+                </h6>
+                ${scenarioListHtml}
+              </div>
+              <div class="card-footer bg-transparent">
+                <div class="d-flex justify-content-end gap-2">
+                  ${getCurrentUserRole() === 'viewer' ? 
+                    '<span class="text-muted small">Sadece Görüntüleme</span>' : 
+                    `<button class="btn btn-info btn-sm" onclick="editRule('${rule.id}')" title="Düzenle">
+                       <i class="bi bi-pencil"></i>
+                     </button>
+                     <button class="btn btn-danger btn-sm" onclick="deleteRule('${rule.id}')" title="Sil">
+                       <i class="bi bi-trash"></i>
+                     </button>`
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      
+      // Add filter result info if filtering
+      if (filterText) {
+        const totalRules = rules.length;
+        const filteredCount = rulesToRender.length;
+        
+        html = `
+          <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle"></i> 
+            "<strong>${filterText}</strong>" için ${filteredCount} kural bulundu (toplam: ${totalRules} kural)
+          </div>
+        ` + html;
+      }
+      
+      ruleContainer.innerHTML = html;
+      
+      console.log(`✅ Rule list rendered: ${rulesToRender.length} rules`);
+    }
+    
+    // Escape regex special characters
+    function escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    // Setup Scenario Search Functionality
+    function setupScenarioSearch() {
+      const searchInput = document.getElementById('scenarioSearchInput');
+      const clearButton = document.getElementById('clearScenarioSearch');
+      const checkboxItems = document.querySelectorAll('.scenario-checkbox-item');
+      
+      if (!searchInput || !clearButton) {
+        console.error('❌ Search elements not found');
+        return;
+      }
+      
+      console.log(`🔍 Setting up search for ${checkboxItems.length} scenarios`);
+      
+      // Search function
+      function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        checkboxItems.forEach(item => {
+          const scenarioName = item.getAttribute('data-scenario-name');
+          const scenarioId = item.getAttribute('data-scenario-id');
+          
+          // Search in both name and ID
+          const matchesName = scenarioName.includes(searchTerm);
+          const matchesId = scenarioId.includes(searchTerm);
+          
+          if (searchTerm === '' || matchesName || matchesId) {
+            item.style.display = '';
+            visibleCount++;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+        
+        // Show/hide no results message
+        const container = document.getElementById('scenarioCheckboxContainer');
+        let noResultsMsg = container.querySelector('.no-results-message');
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+          if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'no-results-message alert alert-warning py-2 my-2';
+            noResultsMsg.innerHTML = `
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              "<strong>${searchTerm}</strong>" ile eşleşen senaryo bulunamadı.
+            `;
+            container.appendChild(noResultsMsg);
+          }
+        } else {
+          if (noResultsMsg) {
+            noResultsMsg.remove();
+          }
+        }
+        
+        console.log(`🔍 Search: "${searchTerm}" → ${visibleCount} results`);
+      }
+      
+      // Real-time search on input
+      searchInput.addEventListener('input', performSearch);
+      
+      // Search on Enter key
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          performSearch();
+        }
+      });
+      
+      // Clear search
+      clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        performSearch();
+        searchInput.focus();
+      });
+      
+      // Focus on search input for better UX
+      searchInput.focus();
+      
+      console.log('✅ Scenario search functionality setup completed');
+    }
+    
+    // Delete scenario function - GLOBAL SCOPE
+    window.deleteScenario = function(scenarioId) {
+      if (confirm('Bu senaryoyu silmek istediğinizden emin misiniz?')) {
+        const scenarioIndex = scenarios.findIndex(s => s.id === scenarioId);
+        if (scenarioIndex !== -1) {
+          scenarios[scenarioIndex].status = 0; // Mark as deleted
+          updateScenarioList();
+          saveToLocalStorage();
+          alert('Senaryo başarıyla silindi!');
+        }
+      }
+    };
+    
+    // Add Mock Service function - GLOBAL SCOPE
+    window.addMockService = function() {
+      console.log('➕ Adding new mock service...');
+      
+      mockServiceCount++;
+      const container = document.getElementById('mockServicesContainer');
+      
+      if (!container) {
+        console.error('❌ mockServicesContainer not found');
+        return;
+      }
+      
+      const newServiceHTML = `
+        <div class="card mb-3 service-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6>Mock Servis #${mockServiceCount}</h6>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeMockService(this)">
+                <i class="bi bi-trash"></i> Kaldır
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Servis Adı</label>
+                <input type="text" class="form-control" name="serviceName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">TransactionName</label>
+                <input type="text" class="form-control" name="endpointUrl">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Çıktı Şeması / Örnek Response</label>
+              <textarea class="form-control" name="responseData" rows="5" required></textarea>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('beforeend', newServiceHTML);
+      console.log(`✅ Mock service #${mockServiceCount} added`);
+    };
+    
+    // Remove Mock Service function - GLOBAL SCOPE
+    window.removeMockService = function(button) {
+      const serviceCard = button.closest('.service-card');
+      if (serviceCard) {
+        serviceCard.remove();
+        console.log('🗑️ Mock service removed');
+      }
+    };
+    
+    // Add Edit Mock Service function (for edit modal) - GLOBAL SCOPE
+    window.addEditMockService = function() {
+      console.log('➕ Adding new edit mock service...');
+      
+      editMockServiceCount++;
+      const container = document.getElementById('editMockServicesContainer');
+      
+      if (!container) {
+        console.error('❌ editMockServicesContainer not found');
+        return;
+      }
+      
+      const newServiceHTML = `
+        <div class="card mb-3 service-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6>Mock Servis #${editMockServiceCount}</h6>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditMockService(this)">
+                <i class="bi bi-trash"></i> Kaldır
+              </button>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Servis Adı</label>
+                <input type="text" class="form-control" name="editServiceName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">TransactionName</label>
+                <input type="text" class="form-control" name="editEndpointUrl">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Çıktı Şeması / Örnek Response</label>
+              <textarea class="form-control" name="editResponseData" rows="5" required></textarea>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('beforeend', newServiceHTML);
+      console.log(`✅ Edit mock service #${editMockServiceCount} added`);
+    };
+    
+    // Remove Edit Mock Service function - GLOBAL SCOPE
+    window.removeEditMockService = function(button) {
+      const serviceCard = button.closest('.service-card');
+      if (serviceCard) {
+        serviceCard.remove();
+        console.log('🗑️ Edit mock service removed');
+      }
+    };
+    
+    // ===== PHASE 1: ADVANCED FILTERING SYSTEM =====
+    
+    // Apply Filters function - GLOBAL SCOPE  
+    window.applyFilters = function() {
+      filterScenarios();
+    };
+    
+    // Clear Filters function - GLOBAL SCOPE
+    window.clearFilters = function() {
+      console.log('🧹 Clearing all filters...');
+      
+      // Clear all filter inputs
+      document.getElementById('filterScenarioName').value = '';
+      document.getElementById('filterServiceName').value = '';
+      document.getElementById('filterTransactionName').value = '';
+      document.getElementById('filterChannel').value = '';
+      
+      // Reset to show all scenarios
+      updateScenarioList();
+      
+      console.log('✅ All filters cleared');
+    };
+    
+    // Advanced Filter Scenarios function
+    function filterScenarios() {
+      console.log('🔍 Advanced filtering starting...');
+      
+      // Get filter values
+      const scenarioNameFilter = document.getElementById('filterScenarioName').value.toLowerCase().trim();
+      const serviceNameFilter = document.getElementById('filterServiceName').value.toLowerCase().trim();
+      const transactionNameFilter = document.getElementById('filterTransactionName').value.toLowerCase().trim();
+      const channelFilter = document.getElementById('filterChannel').value;
+      
+      console.log('Filter values:', {
+        scenarioName: scenarioNameFilter,
+        serviceName: serviceNameFilter,
+        transactionName: transactionNameFilter,
+        channel: channelFilter
+      });
+      
+      // Get all active scenarios
+      const activeScenarios = scenarios.filter(s => s.status !== 0);
+      console.log('Active scenarios before filtering:', activeScenarios.length);
+      
+      // Apply filters
+      let filteredScenarios = activeScenarios;
+      
+      // Scenario name filter
+      if (scenarioNameFilter) {
+        filteredScenarios = filteredScenarios.filter(scenario => 
+          scenario.name.toLowerCase().includes(scenarioNameFilter)
+        );
+        console.log('After scenario name filter:', filteredScenarios.length);
+      }
+      
+      // Service name filter
+      if (serviceNameFilter) {
+        filteredScenarios = filteredScenarios.filter(scenario => {
+          return scenario.mockServices.some(service => 
+            service.serviceName.toLowerCase().includes(serviceNameFilter)
+          );
+        });
+        console.log('After service name filter:', filteredScenarios.length);
+      }
+      
+      // Transaction name filter
+      if (transactionNameFilter) {
+        filteredScenarios = filteredScenarios.filter(scenario => {
+          return scenario.mockServices.some(service => 
+            service.endpointUrl.toLowerCase().includes(transactionNameFilter)
+          );
+        });
+        console.log('After transaction name filter:', filteredScenarios.length);
+      }
+      
+      // Channel filter
+      if (channelFilter) {
+        filteredScenarios = filteredScenarios.filter(scenario => 
+          scenario.channel === channelFilter
+        );
+        console.log('After channel filter:', filteredScenarios.length);
+      }
+      
+      console.log('✅ Filtering completed. Results:', filteredScenarios.length);
+      
+      // Display filtered scenarios
+      displayFilteredScenarios(filteredScenarios);
+    }
+    
+    // Display Filtered Scenarios function WITH PAGINATION
+    function displayFilteredScenarios(filteredScenarios) {
+      const scenarioTableBody = document.getElementById('scenarioTableBody');
+      
+      if (!scenarioTableBody) {
+        console.error('❌ scenarioTableBody element not found');
+        return;
+      }
+      
+      // Clear existing content
+      scenarioTableBody.innerHTML = '';
+      
+      // Show no results message if filtered scenarios is empty
+      if (filteredScenarios.length === 0) {
+        scenarioTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-3">
+              <div class="alert alert-warning mb-0">
+                <i class="bi bi-exclamation-triangle me-2"></i> 
+                Filtrelere uygun senaryo bulunamadı.
+                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="clearFilters()">
+                  <i class="bi bi-x-circle"></i> Filtreleri Temizle
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+        
+        // Hide pagination for no results
+        const paginationContainer = document.getElementById('scenarioPagination');
+        if (paginationContainer) {
+          paginationContainer.style.display = 'none';
+        }
+        
+        // Update counts
+        updateScenarioCounts(0, scenarios.filter(s => s.status !== 0).length);
+        return;
+      }
+      
+      // Add filtered scenarios to table (ALL of them - pagination will handle visibility)
+      filteredScenarios.forEach(scenario => {
+        const serviceNames = scenario.mockServices.map(s => s.serviceName).join(', ');
+        const transactionNames = scenario.mockServices.map(s => s.endpointUrl).join(', ');
+        
+        const row = document.createElement('tr');
+        row.className = 'scenario-row filtered-row';
+        row.setAttribute('data-scenario-id', scenario.id);
+        
+        row.innerHTML = `
+          <td><span class="badge bg-secondary">${scenario.id}</span></td>
+          <td><strong>${scenario.name}</strong></td>
+          <td><small class="text-muted">${serviceNames}</small></td>
+          <td><small class="text-muted">${transactionNames}</small></td>
+          <td>${scenario.channel ? `<span class="badge bg-secondary">${scenario.channel}</span>` : '-'}</td>
+          <td>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-sm btn-primary edit-scenario" data-scenario-id="${scenario.id}" title="Düzenle">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-danger delete-scenario" data-scenario-id="${scenario.id}" title="Sil">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        
+        scenarioTableBody.appendChild(row);
+      });
+      
+      // Setup pagination for filtered results
+      setupFilteredScenarioPagination(filteredScenarios.length);
+      
+      // Show first page of filtered results
+      showFilteredScenarioPage(1);
+      
+      console.log('✅ Filtered scenarios displayed with pagination');
+    }
+    
+    // Setup Pagination for Filtered Scenarios
+    function setupFilteredScenarioPagination(filteredCount) {
+      const itemsPerPage = 10; // MAX 10 RECORDS
+      const totalPages = Math.ceil(filteredCount / itemsPerPage);
+      
+      console.log(`📄 Filtered pagination setup: ${filteredCount} scenarios, ${totalPages} pages`);
+      
+      const paginationContainer = document.getElementById('scenarioPagination');
+      if (!paginationContainer) return;
+      
+      // Hide pagination if only 1 page or less
+      if (totalPages <= 1) {
+        paginationContainer.style.display = 'none';
+        updateScenarioCounts(filteredCount, scenarios.filter(s => s.status !== 0).length);
+        return;
+      }
+      
+      // Show pagination
+      paginationContainer.style.display = '';
+      
+      // Build pagination HTML (same as regular pagination)
+      let paginationHTML = `
+        <nav aria-label="Filtrelenmiş senaryo sayfaları">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item disabled" id="scenarioPrevPage">
+              <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            <li class="page-item active">
+              <a class="page-link" href="#" data-page="1">1</a>
+            </li>
+      `;
+      
+      if (totalPages > 1) {
+        for (let i = 2; i <= Math.min(totalPages, 5); i++) {
+          paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+        }
+        
+        if (totalPages > 5) {
+          paginationHTML += `
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            <li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>
+          `;
+        }
+      }
+      
+      paginationHTML += `
+            <li class="page-item" id="scenarioNextPage">
+              <a class="page-link" href="#">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      `;
+      
+      paginationContainer.innerHTML = paginationHTML;
+      
+      // Setup events for filtered pagination
+      setupFilteredScenarioPageEvents(totalPages);
+    }
+    
+    // Show Filtered Scenario Page
+    function showFilteredScenarioPage(page) {
+      const rows = document.querySelectorAll('#scenarioTableBody .filtered-row');
+      const itemsPerPage = 10;
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      
+      // Hide/show filtered rows
+      rows.forEach((row, index) => {
+        if (index >= startIndex && index < endIndex) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Update counts
+      const visibleCount = Math.min(itemsPerPage, rows.length - startIndex);
+      const totalCount = scenarios.filter(s => s.status !== 0).length;
+      
+      updateScenarioCounts(visibleCount, totalCount);
+    }
+    
+    // Setup Events for Filtered Pagination
+    function setupFilteredScenarioPageEvents(totalPages) {
+      const pageLinks = document.querySelectorAll('#scenarioPagination .page-link[data-page]');
+      const prevPageBtn = document.getElementById('scenarioPrevPage');
+      const nextPageBtn = document.getElementById('scenarioNextPage');
+      
+      let currentPage = 1;
+      
+      pageLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = parseInt(this.getAttribute('data-page'));
+          if (page) {
+            showFilteredScenarioPage(page);
+            
+            document.querySelectorAll('#scenarioPagination .page-item').forEach(item => {
+              item.classList.remove('active');
+            });
+            this.parentElement.classList.add('active');
+            currentPage = page;
+            
+            prevPageBtn.classList.toggle('disabled', page === 1);
+            nextPageBtn.classList.toggle('disabled', page === totalPages);
+          }
+        });
+      });
+      
+      if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (currentPage > 1) {
+            showFilteredScenarioPage(currentPage - 1);
+            
+            const newActivePage = document.querySelector(`#scenarioPagination .page-link[data-page="${currentPage - 1}"]`);
+            if (newActivePage) {
+              document.querySelectorAll('#scenarioPagination .page-item').forEach(item => {
+                item.classList.remove('active');
+              });
+              newActivePage.parentElement.classList.add('active');
+            }
+            
+            currentPage--;
+            prevPageBtn.classList.toggle('disabled', currentPage === 1);
+            nextPageBtn.classList.toggle('disabled', currentPage === totalPages);
+          }
+        });
+      }
+      
+      if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (currentPage < totalPages) {
+            showFilteredScenarioPage(currentPage + 1);
+            
+            const newActivePage = document.querySelector(`#scenarioPagination .page-link[data-page="${currentPage + 1}"]`);
+            if (newActivePage) {
+              document.querySelectorAll('#scenarioPagination .page-item').forEach(item => {
+                item.classList.remove('active');
+              });
+              newActivePage.parentElement.classList.add('active');
+            }
+            
+            currentPage++;
+            prevPageBtn.classList.toggle('disabled', currentPage === 1);
+            nextPageBtn.classList.toggle('disabled', currentPage === totalPages);
+          }
+        });
+      }
+    }
+    
+    // Update Scenario Counts function
+    function updateScenarioCounts(visibleCount, totalCount) {
+      const totalCountElement = document.getElementById('scenarioTotalCount');
+      const visibleCountElement = document.getElementById('scenarioVisibleCount');
+      
+      if (totalCountElement) {
+        totalCountElement.textContent = `Toplam: ${totalCount} senaryo`;
+      }
+      
+      if (visibleCountElement) {
+        if (visibleCount === totalCount) {
+          visibleCountElement.textContent = `Görüntülenen: ${visibleCount} senaryo`;
+        } else {
+          visibleCountElement.textContent = `Eşleşen: ${visibleCount} senaryo`;
+        }
+      }
+    }
+    
+    // ===== PHASE 2: FULL EDIT SCENARIO FUNCTIONALITY =====
+    
+    // Edit scenario function - GLOBAL SCOPE (FULL IMPLEMENTATION)
+    window.editScenario = function(scenarioId) {
+      console.log('✏️ Opening edit scenario for ID:', scenarioId);
+      
+      scenarioId = parseInt(scenarioId);
+      const scenario = scenarios.find(s => s.id === scenarioId);
+      
+      if (!scenario) {
+        console.error('❌ Scenario not found:', scenarioId);
+        alert('Senaryo bulunamadı!');
+        return;
+      }
+      
+      // Fill form fields
+      document.getElementById('editScenarioId').value = scenario.id;
+      document.getElementById('editScenarioName').value = scenario.name;
+      document.getElementById('editScenarioDescription').value = scenario.description;
+      
+      // Set channel if exists
+      const channelSelect = document.getElementById('editScenarioChannel');
+      if (channelSelect) {
+        channelSelect.value = scenario.channel || '';
+      }
+      
+      // Clear mock services container
+      const container = document.getElementById('editMockServicesContainer');
+      if (container) {
+        container.innerHTML = '';
+        
+        // Add mock services
+        scenario.mockServices.forEach((service, index) => {
+          const serviceCard = document.createElement('div');
+          serviceCard.className = 'card mb-3 service-card';
+          serviceCard.innerHTML = `
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6>Mock Servis #${index + 1}</h6>
+                ${scenario.mockServices.length > 1 ? 
+                  `<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditMockService(this)">
+                     <i class="bi bi-trash"></i> Kaldır
+                   </button>` : ''}
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Servis Adı</label>
+                  <input type="text" class="form-control" name="editServiceName" value="${service.serviceName}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">TransactionName</label>
+                  <input type="text" class="form-control" name="editEndpointUrl" value="${service.endpointUrl}">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Çıktı Şeması / Örnek Response</label>
+                <textarea class="form-control" name="editResponseData" rows="5" required>${service.responseData}</textarea>
+              </div>
+            </div>
+          `;
+          container.appendChild(serviceCard);
+        });
+      }
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('editScenarioModal'));
+      modal.show();
+      
+      console.log('✅ Edit scenario modal opened');
+    };
+    
+    // Update Scenario function - GLOBAL SCOPE
+    window.updateScenario = function() {
+      console.log('💾 Starting updateScenario...');
+      
+      const form = document.getElementById('editScenarioForm');
+      if (!form) {
+        console.error('❌ editScenarioForm not found');
+        alert('Form bulunamadı!');
+        return;
+      }
+      
+      if (form.checkValidity()) {
+        const scenarioId = parseInt(document.getElementById('editScenarioId').value);
+        const name = document.getElementById('editScenarioName').value;
+        const description = document.getElementById('editScenarioDescription').value;
+        const channel = document.getElementById('editScenarioChannel').value;
+        
+        console.log('Updated scenario data:', {scenarioId, name, description, channel});
+        
+        // Check for duplicate names (excluding current scenario)
+        const existingScenario = scenarios.find(s => 
+          s.name.toLowerCase() === name.toLowerCase() && 
+          s.id !== scenarioId && 
+          s.status !== 0
+        );
+        
+        if (existingScenario) {
+          alert(`Bu isimde bir senaryo zaten mevcut! (Senaryo ID: ${existingScenario.id})\nLütfen farklı bir isim giriniz.`);
+          return;
+        }
+        
+        // Get mock services
+        const mockServices = [];
+        const serviceCards = document.querySelectorAll('#editMockServicesContainer .service-card');
+        
+        console.log(`Found ${serviceCards.length} service cards to update`);
+        
+        serviceCards.forEach((card, index) => {
+          const serviceName = card.querySelector('[name="editServiceName"]').value;
+          const endpointUrl = card.querySelector('[name="editEndpointUrl"]').value;
+          const responseData = card.querySelector('[name="editResponseData"]').value;
+          
+          console.log(`Service ${index + 1}:`, {serviceName, endpointUrl});
+          
+          mockServices.push({
+            serviceName,
+            endpointUrl,
+            responseData
+          });
+        });
+        
+        // Find and update scenario
+        const scenarioIndex = scenarios.findIndex(s => s.id === scenarioId);
+        if (scenarioIndex !== -1) {
+          scenarios[scenarioIndex] = {
+            ...scenarios[scenarioIndex],
+            name,
+            description,
+            channel,
+            mockServices,
+            updatedAt: new Date().toISOString()
+          };
+          
+          console.log('✅ Scenario updated:', scenarios[scenarioIndex]);
+          
+          // Update displays
+          updateScenarioList();
+          updateHeaderScenarioList();
+          
+          // Save to localStorage
+          saveToLocalStorage();
+          
+          // Close modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('editScenarioModal'));
+          if (modal) {
+            modal.hide();
+          }
+          
+          // Success message
+          alert(`✅ Senaryo "${name}" başarıyla güncellendi!`);
+          console.log('✅ updateScenario completed successfully');
+          
+        } else {
+          console.error('❌ Scenario not found for update:', scenarioId);
+          alert('Güncellenecek senaryo bulunamadı!');
+        }
+        
+      } else {
+        console.log('❌ Form validation failed');
+        form.reportValidity();
+      }
+    };
+    
+    // ===== RULE MANAGEMENT FUNCTIONS =====
+    
+    // Save Rule function - GLOBAL SCOPE
+    window.saveRule = function() {
+      console.log('💾 saveRule() called');
+      const form = document.getElementById('newRuleForm');
+      const ruleValue = document.getElementById('ruleValue').value.trim();
+      
+      // Get selected scenarios
+      const assignedScenarios = [];
+      const checkboxes = document.querySelectorAll('#scenarioCheckboxes input[type="checkbox"]:checked');
+      
+      console.log(`Found ${checkboxes.length} selected scenarios`);
+      
+      checkboxes.forEach(checkbox => {
+        assignedScenarios.push(parseInt(checkbox.value));
+      });
+      
+      console.log('Assigned scenarios:', assignedScenarios);
+      
+      // Validate rule value
+      const ruleInfoValid = ruleValue !== '';
+      
+      // Validate at least one scenario selected
+      const scenariosValid = assignedScenarios.length > 0;
+      
+      // Show/hide validation feedback
+      const scenarioValidationFeedback = document.getElementById('scenarioValidationFeedback');
+      
+      if (!scenariosValid) {
+        scenarioValidationFeedback.classList.remove('d-none');
+      } else {
+        scenarioValidationFeedback.classList.add('d-none');
+      }
+      
+      // If all validations pass, save the rule
+      if (ruleInfoValid && scenariosValid) {
+        // Ensure rules is an array
+        if (!Array.isArray(rules)) {
+          rules = [];
+        }
+        
+        // Create new rule
+        const newRule = {
+          id: 'rule-' + Date.now(),
+          ruleValue: ruleValue,
+          assignedScenarios
+        };
+        
+        console.log('Creating new rule:', newRule);
+        
+        // Add rule to array
+        rules.push(newRule);
+        
+        // Update rule list (if function exists)
+        if (typeof updateRuleList === 'function') {
+          updateRuleList();
+        }
+        
+        // Save to localStorage
+        saveToLocalStorage();
+        
+        // Reset form
+        form.reset();
+        scenarioValidationFeedback.classList.add('d-none');
+        
+        // Success message
+        alert('✅ Kural başarıyla kaydedildi!');
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('newRuleModal'));
+        if (modal) {
+          modal.hide();
+        }
+        
+        console.log('✅ Rule saved successfully');
+        
+      } else if (!ruleInfoValid) {
+        alert('❌ Lütfen kural değerini giriniz.');
+      } else if (!scenariosValid) {
+        alert('❌ Lütfen en az bir senaryo seçiniz.');
+      }
+    };
+    
+    // Update Rule function - GLOBAL SCOPE
+    window.updateRule = function() {
+      console.log('💾 updateRule() called');
+      
+      const form = document.getElementById('editRuleForm');
+      const ruleId = document.getElementById('editRuleId').value;
+      const ruleValue = document.getElementById('editRuleValue').value.trim();
+      
+      console.log('📝 Updating rule:', { ruleId, ruleValue });
+      
+      // Get selected scenarios
+      const assignedScenarios = [];
+      const checkboxes = document.querySelectorAll('#editScenarioCheckboxes input[type="checkbox"]:checked');
+      
+      checkboxes.forEach(checkbox => {
+        assignedScenarios.push(parseInt(checkbox.value));
+      });
+      
+      console.log('🎯 Selected scenarios:', assignedScenarios);
+      
+      // Validate rule value
+      const ruleInfoValid = ruleValue !== '';
+      
+      // Validate at least one scenario selected
+      const scenariosValid = assignedScenarios.length > 0;
+      
+      // Show/hide validation feedback
+      const scenarioValidationFeedback = document.getElementById('editScenarioValidationFeedback');
+      
+      if (!scenariosValid) {
+        scenarioValidationFeedback.classList.remove('d-none');
+      } else {
+        scenarioValidationFeedback.classList.add('d-none');
+      }
+      
+      // If all validations pass, save the rule
+      if (ruleInfoValid && scenariosValid) {
+        // Find and update the rule
+        const ruleIndex = rules.findIndex(r => r.id === ruleId);
+        
+        if (ruleIndex !== -1) {
+          // Update rule
+          rules[ruleIndex] = {
+            ...rules[ruleIndex],
+            ruleValue: ruleValue,
+            assignedScenarios: assignedScenarios
+          };
+          
+          console.log('✅ Rule updated:', rules[ruleIndex]);
+          
+          // Update rule list display
+          updateRuleList();
+          
+          // Save to localStorage
+          saveToLocalStorage();
+          
+          // Hide validation feedback
+          scenarioValidationFeedback.classList.add('d-none');
+          
+          // Success message
+          alert('✅ Kural başarıyla güncellendi!');
+          
+          // Close modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('editRuleModal'));
+          if (modal) {
+            modal.hide();
+          }
+          
+          console.log('🎉 Rule update completed successfully');
+          
+        } else {
+          console.error('❌ Rule not found for update:', ruleId);
+          alert('❌ Güncellenecek kural bulunamadı!');
+        }
+        
+      } else if (!ruleInfoValid) {
+        alert('❌ Lütfen kural değerini giriniz.');
+      } else if (!scenariosValid) {
+        alert('❌ Lütfen en az bir senaryo seçiniz.');
+      }
+    };
+    
+    // Delete Scenario function - GLOBAL SCOPE
+    window.deleteScenario = function(scenarioId) {
+      if (confirm('Bu senaryoyu silmek istediğinizden emin misiniz?')) {
+        const index = scenarios.findIndex(s => s.id === parseInt(scenarioId));
+        if (index !== -1) {
+          scenarios[index].status = 0; // Soft delete
+          updateScenarioList();
+          updateHeaderScenarioList();
+          saveToLocalStorage();
+          alert('✅ Senaryo başarıyla silindi!');
+        }
+      }
+    };
+    
+    // Add Mock Service function - GLOBAL SCOPE
+    window.addMockService = function() {
+      mockServiceCount++;
+      const container = document.getElementById('mockServicesContainer');
+      
+      const serviceCard = document.createElement('div');
+      serviceCard.className = 'card mb-3 service-card';
+      serviceCard.innerHTML = `
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6>Mock Servis #${mockServiceCount}</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeMockService(this)">
+              <i class="bi bi-trash"></i> Kaldır
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Servis Adı</label>
+              <input type="text" class="form-control" name="serviceName" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">TransactionName</label>
+              <input type="text" class="form-control" name="endpointUrl">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Çıktı Şeması / Örnek Response</label>
+            <textarea class="form-control" name="responseData" rows="5" required></textarea>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(serviceCard);
+    };
+    
+    // Remove Mock Service function - GLOBAL SCOPE
+    window.removeMockService = function(button) {
+      const serviceCard = button.closest('.service-card');
+      if (serviceCard) {
+        serviceCard.remove();
+      }
+    };
+    
+    // Add Edit Mock Service function - GLOBAL SCOPE
+    window.addEditMockService = function() {
+      const container = document.getElementById('editMockServicesContainer');
+      const currentCount = container.children.length + 1;
+      
+      const serviceCard = document.createElement('div');
+      serviceCard.className = 'card mb-3 service-card';
+      serviceCard.innerHTML = `
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6>Mock Servis #${currentCount}</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditMockService(this)">
+              <i class="bi bi-trash"></i> Kaldır
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Servis Adı</label>
+              <input type="text" class="form-control" name="editServiceName" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">TransactionName</label>
+              <input type="text" class="form-control" name="editEndpointUrl">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Çıktı Şeması / Örnek Response</label>
+            <textarea class="form-control" name="editResponseData" rows="5" required></textarea>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(serviceCard);
+    };
+    
+    // Remove Edit Mock Service function - GLOBAL SCOPE  
+    window.removeEditMockService = function(button) {
+      const serviceCard = button.closest('.service-card');
+      if (serviceCard) {
+        serviceCard.remove();
+      }
+    };
+    
+    // Modal Event Listeners Setup
+    document.addEventListener('DOMContentLoaded', function() {
+      // New Rule Modal Event Listener
+      const newRuleModal = document.getElementById('newRuleModal');
+      if (newRuleModal) {
+        newRuleModal.addEventListener('shown.bs.modal', function() {
+          console.log('🔄 New rule modal shown, rendering scenario checkboxes...');
+          
+          // Get active scenarios
+          const activeScenarios = scenarios.filter(s => s.status !== 0);
+          console.log('Active scenarios:', activeScenarios.length);
+          
+          // Find container
+          const container = document.getElementById('scenarioCheckboxes');
+          if (!container) {
+            console.error('❌ scenarioCheckboxes container not found!');
+            return;
+          }
+          
+          // Clear container
+          container.innerHTML = '';
+          
+          // If no scenarios, show warning
+          if (!activeScenarios || activeScenarios.length === 0) {
+            container.innerHTML = `
+              <div class="alert alert-warning my-2">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Henüz hiç senaryo tanımlanmamış. Önce senaryo eklemelisiniz!
+              </div>
+            `;
+            return;
+          }
+          
+          // Add search input for scenario filtering
+          let searchHtml = `
+            <div class="mb-3">
+              <div class="input-group input-group-sm">
+                <input type="text" class="form-control" id="scenarioSearchInput" 
+                       placeholder="🔍 Senaryo adı veya ID ile ara..." 
+                       autocomplete="off">
+                <button class="btn btn-outline-secondary" type="button" id="clearScenarioSearch">
+                  <i class="bi bi-x-circle"></i>
+                </button>
+              </div>
+              <div class="form-text">Senaryo adı veya ID numarası ile arama yapabilirsiniz</div>
+            </div>
+          `;
+          
+          // Create scrollable container for checkboxes
+          let checkboxHtml = `
+            <div id="scenarioCheckboxContainer" style="max-height: 250px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px;">
+          `;
+          
+          activeScenarios.forEach(scenario => {
+            checkboxHtml += `
+              <div class="form-check py-2 scenario-checkbox-item" 
+                   data-scenario-name="${scenario.name.toLowerCase()}" 
+                   data-scenario-id="${scenario.id}">
+                <input class="form-check-input" type="checkbox" value="${scenario.id}" id="scenarioCheckbox_${scenario.id}">
+                <label class="form-check-label" for="scenarioCheckbox_${scenario.id}">
+                  <strong>${scenario.name}</strong> 
+                  <small class="text-muted">(ID: ${scenario.id})</small>
+                  <br>
+                  <span class="small text-muted">${scenario.description || 'Açıklama yok'}</span>
+                </label>
+              </div>
+            `;
+          });
+          
+          checkboxHtml += `</div>`;
+          
+          // Set container content with search and checkboxes
+          container.innerHTML = searchHtml + checkboxHtml;
+          
+          // Setup search functionality
+          setupScenarioSearch();
+          
+          console.log(`✅ Rendered ${activeScenarios.length} scenario checkboxes`);
+        });
+      }
+      
+      // Edit Rule Modal Event Listener (if needed)
+      const editRuleModal = document.getElementById('editRuleModal');
+      if (editRuleModal) {
+        editRuleModal.addEventListener('shown.bs.modal', function() {
+          console.log('🔄 Edit rule modal shown');
+          // Implementation for edit rule modal if needed
+        });
+      }
+    });
+    
+  </script>
+
+  <!-- CHANNEL MANAGEMENT SYSTEM -->
+  <script>
+    // Initialize default channels
+    function initializeDefaultChannels() {
+      const defaultChannels = [
+        { id: 1, channelCode: '111', description: 'Enpara Bireysel Internet', isActive: true },
+        { id: 2, channelCode: '115', description: 'Enpara Bireysel Çözüm Merkezi', isActive: true },
+        { id: 3, channelCode: '154', description: 'Enpara Bireysel Cep Şubesi', isActive: true },
+        { id: 4, channelCode: '303', description: 'Enpara Şirketim İnternet Şube', isActive: true },
+        { id: 5, channelCode: '305', description: 'Enpara Şirketim Çözüm Merkezi', isActive: true },
+        { id: 6, channelCode: '155', description: 'Enpara Şirketim Cep Şubesi', isActive: true }
+      ];
+      
+      const savedChannels = localStorage.getItem('mockverse_channels');
+      if (!savedChannels) {
+        channels = defaultChannels;
+        localStorage.setItem('mockverse_channels', JSON.stringify(channels));
+        console.log('✅ Default channels initialized');
+      } else {
+        channels = JSON.parse(savedChannels);
+        console.log(`📊 Loaded ${channels.length} channels from localStorage`);
+      }
+      
+      updateChannelList();
+      updateChannelDropdowns();
+    }
+    
+    // Update channel list display
+    function updateChannelList() {
+      const tableBody = document.getElementById('channelTableBody');
+      const totalCount = document.getElementById('channelTotalCount');
+      const visibleCount = document.getElementById('channelVisibleCount');
+      
+      if (!tableBody) return;
+      
+      const activeChannels = channels.filter(c => c.isActive);
+      
+      if (activeChannels.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              <i class="bi bi-broadcast fs-1 d-block mb-2"></i>
+              Henüz hiç kanal tanımlanmamış.
+            </td>
+          </tr>
+        `;
+      } else {
+        const userRole = getCurrentUserRole();
+        tableBody.innerHTML = activeChannels.map(channel => {
+          let actionButtons = '';
+          if (userRole === 'admin') {
+            actionButtons = `
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="editChannel(${channel.id})" title="Düzenle">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteChannel(${channel.id})" title="Sil">
+                <i class="bi bi-trash"></i>
+              </button>
+            `;
+          } else {
+            actionButtons = '<span class="text-muted small">Sadece Admin</span>';
+          }
+          
+          return `
+            <tr>
+              <td>${channel.id}</td>
+              <td><span class="badge bg-secondary">${channel.channelCode}</span></td>
+              <td>${channel.description}</td>
+              <td>
+                <span class="badge ${channel.isActive ? 'bg-success' : 'bg-secondary'}">
+                  ${channel.isActive ? 'Aktif' : 'Pasif'}
+                </span>
+              </td>
+              <td>${actionButtons}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      
+      if (totalCount) totalCount.textContent = `Toplam: ${channels.length} kanal`;
+      if (visibleCount) visibleCount.textContent = `Görüntülenen: ${activeChannels.length} kanal`;
+    }
+    
+    // Update all channel dropdowns
+    function updateChannelDropdowns() {
+      const dropdownIds = ['filterChannel', 'scenarioChannel', 'editScenarioChannel'];
+      const activeChannels = channels.filter(c => c.isActive);
+      
+      dropdownIds.forEach(dropdownId => {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+          // Save current value
+          const currentValue = dropdown.value;
+          
+          // Clear and rebuild options
+          dropdown.innerHTML = '';
+          
+          // Add default option
+          const defaultText = dropdownId === 'filterChannel' ? 'Tüm Kanallar' : 'Kanal Seçilmedi';
+          dropdown.innerHTML += `<option value="">${defaultText}</option>`;
+          
+          // Add channel options
+          activeChannels.forEach(channel => {
+            const optionValue = `${channel.channelCode} - ${channel.description}`;
+            dropdown.innerHTML += `<option value="${optionValue}">${optionValue}</option>`;
+          });
+          
+          // Restore previous value if it still exists
+          if (currentValue) {
+            dropdown.value = currentValue;
+          }
+        }
+      });
+      
+      console.log('✅ Channel dropdowns updated');
+    }
+    
+    // Save channel function - GLOBAL SCOPE
+    window.saveChannel = function() {
+      const form = document.getElementById('newChannelForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      const channelCode = document.getElementById('channelCode').value.trim();
+      const description = document.getElementById('channelDescription').value.trim();
+      
+      // Validate channel code (should be numeric)
+      if (!/^\d+$/.test(channelCode)) {
+        alert('❌ Kanal kodu sadece sayısal değer olmalıdır!');
+        return;
+      }
+      
+      // Check for duplicate channel code
+      const existingChannel = channels.find(c => c.channelCode === channelCode && c.isActive);
+      if (existingChannel) {
+        alert(`❌ Bu kanal kodu zaten mevcut! (${existingChannel.description})`);
+        return;
+      }
+      
+      // Create new channel
+      const maxId = channels.length > 0 ? Math.max(...channels.map(c => c.id)) : 0;
+      const newChannel = {
+        id: maxId + 1,
+        channelCode,
+        description,
+        isActive: true
+      };
+      
+      channels.push(newChannel);
+      
+      // Save to localStorage
+      localStorage.setItem('mockverse_channels', JSON.stringify(channels));
+      
+      // Update displays
+      updateChannelList();
+      updateChannelDropdowns();
+      
+      // Close modal and reset form
+      const modal = bootstrap.Modal.getInstance(document.getElementById('newChannelModal'));
+      if (modal) modal.hide();
+      form.reset();
+      
+      alert('✅ Kanal başarıyla oluşturuldu!');
+    };
+    
+    // Edit channel function - GLOBAL SCOPE
+    window.editChannel = function(channelId) {
+      const channel = channels.find(c => c.id === parseInt(channelId));
+      if (!channel) {
+        alert('❌ Kanal bulunamadı!');
+        return;
+      }
+      
+      // Fill form
+      document.getElementById('editChannelId').value = channel.id;
+      document.getElementById('editChannelCode').value = channel.channelCode;
+      document.getElementById('editChannelDescription').value = channel.description;
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('editChannelModal'));
+      modal.show();
+    };
+    
+    // Update channel function - GLOBAL SCOPE
+    window.updateChannel = function() {
+      const form = document.getElementById('editChannelForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      const channelId = parseInt(document.getElementById('editChannelId').value);
+      const channelCode = document.getElementById('editChannelCode').value.trim();
+      const description = document.getElementById('editChannelDescription').value.trim();
+      
+      // Validate channel code (should be numeric)
+      if (!/^\d+$/.test(channelCode)) {
+        alert('❌ Kanal kodu sadece sayısal değer olmalıdır!');
+        return;
+      }
+      
+      // Check for duplicate channel code (excluding current channel)
+      const existingChannel = channels.find(c => c.channelCode === channelCode && c.id !== channelId && c.isActive);
+      if (existingChannel) {
+        alert(`❌ Bu kanal kodu zaten mevcut! (${existingChannel.description})`);
+        return;
+      }
+      
+      // Find and update channel
+      const channelIndex = channels.findIndex(c => c.id === channelId);
+      if (channelIndex !== -1) {
+        const oldChannelValue = `${channels[channelIndex].channelCode} - ${channels[channelIndex].description}`;
+        const newChannelValue = `${channelCode} - ${description}`;
+        
+        channels[channelIndex].channelCode = channelCode;
+        channels[channelIndex].description = description;
+        
+        // Save to localStorage
+        localStorage.setItem('mockverse_channels', JSON.stringify(channels));
+        
+        // Update channel references in scenarios
+        scenarios.forEach(scenario => {
+          if (scenario.channel === oldChannelValue) {
+            scenario.channel = newChannelValue;
+          }
+        });
+        localStorage.setItem('mockverse_scenarios', JSON.stringify(scenarios));
+        
+        // Update displays
+        updateChannelList();
+        updateChannelDropdowns();
+        updateScenarioList(); // Update scenario list to reflect channel changes
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editChannelModal'));
+        if (modal) modal.hide();
+        
+        alert('✅ Kanal başarıyla güncellendi!');
+      }
+    };
+    
+    // Delete channel function - GLOBAL SCOPE
+    window.deleteChannel = function(channelId) {
+      const channel = channels.find(c => c.id === parseInt(channelId));
+      if (!channel) {
+        alert('❌ Kanal bulunamadı!');
+        return;
+      }
+      
+      const channelValue = `${channel.channelCode} - ${channel.description}`;
+      
+      // Check if channel is used in scenarios
+      const usedInScenarios = scenarios.filter(s => s.channel === channelValue && s.status !== 0);
+      if (usedInScenarios.length > 0) {
+        const scenarioNames = usedInScenarios.map(s => s.name).join(', ');
+        alert(`❌ Bu kanal şu senaryolarda kullanılıyor: ${scenarioNames}\n\nÖnce bu senaryoları güncelleyin veya silin.`);
+        return;
+      }
+      
+      if (confirm(`Bu kanalı silmek istediğinizden emin misiniz?\n\nKanal: ${channelValue}`)) {
+        // Soft delete
+        channel.isActive = false;
+        
+        // Save to localStorage
+        localStorage.setItem('mockverse_channels', JSON.stringify(channels));
+        
+        // Update displays
+        updateChannelList();
+        updateChannelDropdowns();
+        
+        alert('✅ Kanal başarıyla silindi!');
+      }
+    };
+    
+    // Channel filtering functions
+    function applyChannelFilters() {
+      const codeFilter = document.getElementById('filterChannelCode').value.toLowerCase();
+      const descFilter = document.getElementById('filterChannelDescription').value.toLowerCase();
+      
+      const tableBody = document.getElementById('channelTableBody');
+      const rows = tableBody.querySelectorAll('tr');
+      
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 1) {
+          const code = cells[1].textContent.toLowerCase();
+          const desc = cells[2].textContent.toLowerCase();
+          
+          const codeMatch = !codeFilter || code.includes(codeFilter);
+          const descMatch = !descFilter || desc.includes(descFilter);
+          
+          if (codeMatch && descMatch) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+      
+      const visibleCountElement = document.getElementById('channelVisibleCount');
+      if (visibleCountElement) {
+        visibleCountElement.textContent = `Görüntülenen: ${visibleCount} kanal`;
+      }
+    }
+    
+    function clearChannelFilters() {
+      document.getElementById('filterChannelCode').value = '';
+      document.getElementById('filterChannelDescription').value = '';
+      applyChannelFilters();
+    }
+    
+    // Setup channel event listeners
+    function setupChannelEventListeners() {
+      const applyBtn = document.getElementById('applyChannelFiltersBtn');
+      const clearBtn = document.getElementById('clearChannelFiltersBtn');
+      const codeInput = document.getElementById('filterChannelCode');
+      const descInput = document.getElementById('filterChannelDescription');
+      
+      if (applyBtn) applyBtn.addEventListener('click', applyChannelFilters);
+      if (clearBtn) clearBtn.addEventListener('click', clearChannelFilters);
+      
+      if (codeInput) {
+        codeInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') applyChannelFilters();
+        });
+      }
+      
+      if (descInput) {
+        descInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') applyChannelFilters();
+        });
+      }
+    }
+    
+    // USER MANAGEMENT FUNCTIONS
+    let users = [];
+    
+    // Initialize default users
+    function initializeDefaultUsers() {
+      const savedUsers = localStorage.getItem('mockverse_users');
+      if (savedUsers) {
+        users = JSON.parse(savedUsers);
+      } else {
+        // Default admin user
+        users = [
+          {
+            id: 1,
+            userCode: 'admin',
+            name: 'Sistem Yöneticisi',
+            password: 'admin123', // In real app, this should be hashed
+            role: 'admin',
+            isActive: true,
+            createdAt: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem('mockverse_users', JSON.stringify(users));
+      }
+      updateUserList();
+    }
+    
+    // Update user list display
+    function updateUserList() {
+      const tableBody = document.getElementById('userTableBody');
+      if (!tableBody) return;
+      
+      const activeUsers = users.filter(u => u.isActive);
+      
+      if (activeUsers.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Henüz kullanıcı tanımlanmamış.</td></tr>';
+      } else {
+        tableBody.innerHTML = activeUsers.map(user => {
+          const roleText = {
+            'admin': 'Admin',
+            'user': 'User', 
+            'viewer': 'Viewer'
+          }[user.role] || user.role;
+          
+          const roleBadge = {
+            'admin': 'bg-danger',
+            'user': 'bg-primary',
+            'viewer': 'bg-secondary'
+          }[user.role] || 'bg-secondary';
+          
+          const currentUserRole = getCurrentUserRole();
+          let actionButtons = '';
+          
+          if (currentUserRole === 'admin') {
+            actionButtons = `
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser(${user.id})" title="Düzenle">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})" title="Sil">
+                <i class="bi bi-trash"></i>
+              </button>
+            `;
+          } else {
+            actionButtons = '<span class="text-muted small">Sadece Admin</span>';
+          }
+          
+          return `
+            <tr>
+              <td>${user.id}</td>
+              <td><strong>${user.userCode}</strong></td>
+              <td>${user.name}</td>
+              <td><span class="badge ${roleBadge}">${roleText}</span></td>
+              <td><span class="badge bg-success">Aktif</span></td>
+              <td>${actionButtons}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      
+      // Update counts
+      const totalCountElement = document.getElementById('userTotalCount');
+      const visibleCountElement = document.getElementById('userVisibleCount');
+      
+      if (totalCountElement) {
+        totalCountElement.textContent = `Toplam: ${activeUsers.length} kullanıcı`;
+      }
+      if (visibleCountElement) {
+        visibleCountElement.textContent = `Görüntülenen: ${activeUsers.length} kullanıcı`;
+      }
+    }
+    
+    // Save user function - GLOBAL SCOPE
+    window.saveUser = function() {
+      const form = document.getElementById('newUserForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      const userCode = document.getElementById('userCode').value.trim();
+      const name = document.getElementById('userName').value.trim();
+      const password = document.getElementById('userPassword').value.trim();
+      const role = document.getElementById('userRole').value;
+      
+      // Validate password length
+      if (password.length < 6) {
+        alert('❌ Şifre en az 6 karakter olmalıdır!');
+        return;
+      }
+      
+      // Validate password complexity
+      const hasLetter = /[a-zA-Z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      if (!hasLetter || !hasNumber) {
+        alert('❌ Şifre en az bir harf ve bir rakam içermelidir!');
+        return;
+      }
+      
+      // Check for duplicate user code
+      const existingUser = users.find(u => u.userCode.toLowerCase() === userCode.toLowerCase() && u.isActive);
+      if (existingUser) {
+        alert(`❌ Bu kullanıcı kodu zaten mevcut! (${existingUser.name})`);
+        return;
+      }
+      
+      // Create new user
+      const maxId = users.length > 0 ? Math.max(...users.map(u => u.id)) : 0;
+      const newUser = {
+        id: maxId + 1,
+        userCode,
+        name,
+        password, // In real app, this should be hashed
+        role,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      };
+      
+      users.push(newUser);
+      
+      // Save to localStorage
+      localStorage.setItem('mockverse_users', JSON.stringify(users));
+      
+      // Update display
+      updateUserList();
+      
+      // Close modal and reset form
+      const modal = bootstrap.Modal.getInstance(document.getElementById('newUserModal'));
+      if (modal) modal.hide();
+      form.reset();
+      
+      alert('✅ Kullanıcı başarıyla oluşturuldu!');
+    };
+    
+    // Edit user function - GLOBAL SCOPE
+    window.editUser = function(userId) {
+      const user = users.find(u => u.id === parseInt(userId));
+      if (!user) {
+        alert('❌ Kullanıcı bulunamadı!');
+        return;
+      }
+      
+      // Fill form
+      document.getElementById('editUserId').value = user.id;
+      document.getElementById('editUserCode').value = user.userCode;
+      document.getElementById('editUserName').value = user.name;
+      document.getElementById('editUserPassword').value = ''; // Don't show current password
+      document.getElementById('editUserRole').value = user.role;
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+      modal.show();
+    };
+    
+    // Update user function - GLOBAL SCOPE
+    window.updateUser = function() {
+      const form = document.getElementById('editUserForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      const userId = parseInt(document.getElementById('editUserId').value);
+      const userCode = document.getElementById('editUserCode').value.trim();
+      const name = document.getElementById('editUserName').value.trim();
+      const password = document.getElementById('editUserPassword').value.trim();
+      const role = document.getElementById('editUserRole').value;
+      
+      // Validate password if provided
+      if (password && password.length < 6) {
+        alert('❌ Şifre en az 6 karakter olmalıdır!');
+        return;
+      }
+      
+      // Validate password complexity if provided
+      if (password) {
+        const hasLetter = /[a-zA-Z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        if (!hasLetter || !hasNumber) {
+          alert('❌ Şifre en az bir harf ve bir rakam içermelidir!');
+          return;
+        }
+      }
+      
+      // Check for duplicate user code (excluding current user)
+      const existingUser = users.find(u => u.userCode.toLowerCase() === userCode.toLowerCase() && u.id !== userId && u.isActive);
+      if (existingUser) {
+        alert(`❌ Bu kullanıcı kodu zaten mevcut! (${existingUser.name})`);
+        return;
+      }
+      
+      // Find and update user
+      const userIndex = users.findIndex(u => u.id === userId);
+      if (userIndex !== -1) {
+        users[userIndex].userCode = userCode;
+        users[userIndex].name = name;
+        users[userIndex].role = role;
+        
+        // Update password only if provided
+        if (password) {
+          users[userIndex].password = password; // In real app, this should be hashed
+        }
+        
+        users[userIndex].updatedAt = new Date().toISOString();
+        
+        // Save to localStorage
+        localStorage.setItem('mockverse_users', JSON.stringify(users));
+        
+        // Update display
+        updateUserList();
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+        if (modal) modal.hide();
+        
+        alert('✅ Kullanıcı başarıyla güncellendi!');
+      }
+    };
+    
+    // Delete user function - GLOBAL SCOPE
+    window.deleteUser = function(userId) {
+      const user = users.find(u => u.id === parseInt(userId));
+      if (!user) {
+        alert('❌ Kullanıcı bulunamadı!');
+        return;
+      }
+      
+      // Prevent deleting the last admin user
+      const activeAdmins = users.filter(u => u.role === 'admin' && u.isActive);
+      if (user.role === 'admin' && activeAdmins.length === 1) {
+        alert('❌ Son admin kullanıcısını silemezsiniz! En az bir admin kullanıcı bulunmalıdır.');
+        return;
+      }
+      
+      if (confirm(`Bu kullanıcıyı silmek istediğinizden emin misiniz?\n\nKullanıcı: ${user.name} (${user.userCode})`)) {
+        // Soft delete
+        user.isActive = false;
+        user.deletedAt = new Date().toISOString();
+        
+        // Save to localStorage
+        localStorage.setItem('mockverse_users', JSON.stringify(users));
+        
+        // Update display
+        updateUserList();
+        
+        alert('✅ Kullanıcı başarıyla silindi!');
+      }
+    };
+    
+    // User filtering functions
+    function applyUserFilters() {
+      const codeFilter = document.getElementById('filterUserCode').value.toLowerCase();
+      const nameFilter = document.getElementById('filterUserName').value.toLowerCase();
+      const roleFilter = document.getElementById('filterUserRole').value;
+      
+      const tableBody = document.getElementById('userTableBody');
+      const rows = tableBody.querySelectorAll('tr');
+      
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 1) {
+          const code = cells[1].textContent.toLowerCase();
+          const name = cells[2].textContent.toLowerCase();
+          const roleSpan = cells[3].querySelector('.badge');
+          const role = roleSpan ? roleSpan.textContent.toLowerCase() : '';
+          
+          const codeMatch = !codeFilter || code.includes(codeFilter);
+          const nameMatch = !nameFilter || name.includes(nameFilter);
+          const roleMatch = !roleFilter || role.includes(roleFilter.toLowerCase());
+          
+          if (codeMatch && nameMatch && roleMatch) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+      
+      const visibleCountElement = document.getElementById('userVisibleCount');
+      if (visibleCountElement) {
+        visibleCountElement.textContent = `Görüntülenen: ${visibleCount} kullanıcı`;
+      }
+    }
+    
+    function clearUserFilters() {
+      document.getElementById('filterUserCode').value = '';
+      document.getElementById('filterUserName').value = '';
+      document.getElementById('filterUserRole').value = '';
+      applyUserFilters();
+    }
+    
+    // Setup user event listeners
+    function setupUserEventListeners() {
+      const applyBtn = document.getElementById('applyUserFiltersBtn');
+      const clearBtn = document.getElementById('clearUserFiltersBtn');
+      const codeInput = document.getElementById('filterUserCode');
+      const nameInput = document.getElementById('filterUserName');
+      const roleSelect = document.getElementById('filterUserRole');
+      
+      if (applyBtn) applyBtn.addEventListener('click', applyUserFilters);
+      if (clearBtn) clearBtn.addEventListener('click', clearUserFilters);
+      
+      if (codeInput) {
+        codeInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') applyUserFilters();
+        });
+      }
+      
+      if (nameInput) {
+        nameInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') applyUserFilters();
+        });
+      }
+      
+      if (roleSelect) {
+        roleSelect.addEventListener('change', applyUserFilters);
+      }
+    }
+
+    // Initialize channel and user management when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeDefaultChannels();
+      setupChannelEventListeners();
+      initializeDefaultUsers();
+      setupUserEventListeners();
+    });
+    
+  </script>
+
+</body>
+</html> 

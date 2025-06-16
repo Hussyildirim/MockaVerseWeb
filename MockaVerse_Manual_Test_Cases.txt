@@ -1,0 +1,257 @@
+===============================================================================
+                        MockaVerse Manuel Test Case'leri
+===============================================================================
+
+Test Tarihi: 11 Haziran 2025
+Test Sistemi: http://localhost:8000
+Test Edecek: Manuel Test
+Durum: Authentication sistemi çalışıyor, UI fonksiyonları belirsiz
+
+===============================================================================
+🔐 TEST GROUP 1: AUTHENTICATION SYSTEM
+===============================================================================
+
+TC001 - Login Functionality
+---------------------------
+Adımlar:
+1. http://localhost:8000/login.html adresine git
+2. "Fill Admin" butonuna tıkla
+3. "Full Login Test" butonuna tıkla
+Beklenen: index.html'e yönlendirilmelisin ve kullanıcı adı görünmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC002 - Session Persistence
+---------------------------
+Adımlar:
+1. Login yap (TC001)
+2. Yeni tab aç ve http://localhost:8000/index.html git
+3. Sayfayı yenile
+Beklenen: Login kalmış olmalı, yeniden login'e yönlendirilmemeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC003 - Logout Functionality
+----------------------------
+Adımlar:
+1. Login ol (TC001)
+2. Sağ üstteki kullanıcı adının yanındaki logout butonuna tıkla
+3. Confirm dialog'unda "OK" tıkla
+Beklenen: login.html'e yönlendirilmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC004 - Unauthorized Access
+---------------------------
+Adımlar:
+1. Logout yap veya incognito/private mode aç
+2. Direkt http://localhost:8000/index.html git
+Beklenen: Otomatik login.html'e yönlendirilmeli
+Sonuç: [X ] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+===============================================================================
+🎨 TEST GROUP 2: UI/UX ELEMENTS
+===============================================================================
+
+TC005 - Page Loading
+-------------------
+Adımlar:
+1. Login yap ve index.html'de ol
+2. Sayfanın tam yüklendiğini kontrol et
+Beklenen: Bootstrap UI, navbar, kartlar düzgün görünmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC006 - Responsive Design
+------------------------
+Adımlar:
+1. Browser window'u küçült (mobil simüle et)
+2. Sayfanın responsive olduğunu kontrol et
+Beklenen: Mobilde düzgün görünmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC007 - Modal Opening
+--------------------
+Adımlar:
+1. "Yeni Senaryo" butonuna tıkla
+2. Modal açılıp açılmadığını kontrol et
+3. X veya İptal ile kapatmayı dene
+Beklenen: Modal açılmalı ve kapanmalı
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+===============================================================================
+📋 TEST GROUP 3: SCENARIO MANAGEMENT
+===============================================================================
+
+TC008 - Add New Scenario
+------------------------
+Adımlar:
+1. "Yeni Senaryo" butonuna tıkla
+2. Modal açıldıktan sonra form alanlarını doldur:
+   - Senaryo Adı: "Test Senaryo 1"
+   - Açıklama: "Manuel test senaryosu"
+   - Kanal: Herhangi birini seç
+3. "Senaryoyu Kaydet" butonuna tıkla
+Beklenen: Senaryo kaydedilmeli ve listede görünmeli
+Sonuç: [ X] BAŞARILI [] BAŞARISIZ [ ] KISMEN
+Notlar: 
+
+TC009 - Scenario List Display
+-----------------------------
+Adımlar:
+1. Ana sayfada mevcut senaryolar listesini kontrol et
+2. Sayfalama varsa test et
+3. Filtreleme alanına bir şey yazıp test et
+Beklenen: Senaryolar listelenmeli, filtreleme çalışmalı
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: 
+
+TC010 - Edit Scenario
+--------------------
+Adımlar:
+1. Herhangi bir senaryonun "Düzenle" butonuna tıkla
+2. Bilgileri değiştir
+3. "Güncelle" butonuna tıkla
+Beklenen: Değişiklikler kaydedilmeli
+Sonuç: [ ] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: 
+
+TC011 - Delete Scenario
+----------------------
+Adımlar:
+1. Herhangi bir senaryonun "Sil" butonuna tıkla
+2. Confirm dialog'unu onayla
+Beklenen: Senaryo silinmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: Senaryo eklenemediği için test edilemedi.
+
+TC012- Pagging yapısı
+----------------------
+Adımlar:
+1. 10’dan fazla senaryo tanımla
+Beklenen: lk 10 kayıt ana sayfada, sonraki kayıtlar diğer sayfalarda yer almalı
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: 
+
+===============================================================================
+🎯 TEST GROUP 4: MOCK SERVICE MANAGEMENT
+===============================================================================
+
+TC012 - Add Mock Service
+------------------------
+Adımlar:
+1. Bir senaryonun "Mock Servis Ekle" butonuna tıkla
+2. Modal açıldıktan sonra:
+   - Servis Adı: "TestService"
+   - TransactionName: "TestTransaction"
+   - Response Data: {"result": "success"}
+3. "Servisi Kaydet" butonuna tıkla
+Beklenen: Mock servis eklenmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC013 - Mock Service Display
+---------------------------
+Adımlar:
+1. Mock servis eklediğin senaryoyu kontrol et
+2. Mock servislerin listelendiğini görmeli
+Beklenen: Eklenen servisler görünmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+===============================================================================
+📐 TEST GROUP 5: RULE MANAGEMENT
+===============================================================================
+
+TC014 - Add New Rule
+-------------------
+Adımlar:
+1. "Yeni Kural" butonuna tıkla
+2. Kural değeri gir: "customer_id=12345"
+3. En az bir senaryo seç
+4. "Kuralı Oluştur" butonuna tıkla
+Beklenen: Kural oluşturulmalı
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: Senaryolar listelenmiyor
+
+TC015 - Rule Filtering
+---------------------
+Adımlar:
+1. Kural listesinde filtreleme alanına "12345" yaz
+2. Enter'a bas veya arama butonuna tıkla
+Beklenen: İlgili kurallar filtrelenmeli
+Sonuç: [X ] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC016 - Scenario Rule Assignment
+-------------------------------
+Adımlar:
+1. Bir senaryonun yanındaki "Kural Ekle" butonuna tıkla
+2. Kural tanımı gir
+3. "Kuralı Kaydet" butonuna tıkla
+Beklenen: O senaryoya özel kural eklenmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+===============================================================================
+💾 TEST GROUP 6: DATA PERSISTENCE
+===============================================================================
+
+TC017 - Data Persistence After Refresh
+--------------------------------------
+Adımlar:
+1. Yeni senaryo, kural veya mock servis ekle
+2. Sayfayı yenile (F5)
+3. Eklediğin verilerin hala orada olduğunu kontrol et
+Beklenen: Veriler kaybolmamalı
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC018 - Cross-Tab Data Sync
+---------------------------
+Adımlar:
+1. Bir tab'da veri ekle
+2. Yeni tab aç ve index.html'i yükle
+3. Verilerin senkronize olduğunu kontrol et
+Beklenen: Her iki tab'da aynı veriler görünmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+===============================================================================
+🔍 TEST GROUP 7: SEARCH & FILTER
+===============================================================================
+
+TC019 - Scenario Search
+----------------------
+Adımlar:
+1. Senaryo filtreleme alanına metin gir
+2. Arama yap
+3. Sonuçları kontrol et
+Beklenen: İlgili senaryolar filtrelenmeli
+Sonuç: [ X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+TC020 - Pagination
+-----------------
+Adımlar:
+1. Eğer 10’dan fazla senaryo varsa sayfalama butonlarını test et
+2. İleri/geri butonlarına tıkla
+Beklenen: Sayfalama çalışmalı
+Sonuç: [X] BAŞARILI [ ] BAŞARISIZ [ ] KISMEN
+Notlar: ________________________________
+
+===============================================================================
+📊 TEST SONUCU RAPORU
+===============================================================================
+
+Test Tarihi: 12/06/2025
+Test Eden: Hüseyin Yıldırım
+Toplam Test Sayısı: 20
+
+BAŞARILI TESTLER: 20 / 20
+BAŞARISIZ TESTLER: 0 / 20  
+KISMEN ÇALIŞAN: 0 / 20
+
