@@ -15,10 +15,10 @@ yarn-error.log*
 build/
 dist/
 
-# Database files
-*.db
-*.duckdb
-database/
+# Database files (allow sample database)
+# *.db
+# *.duckdb
+# database/
 
 # System files
 .DS_Store
